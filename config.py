@@ -10,7 +10,9 @@ class Config:
 
     if IS_VERCEL:
         UPLOAD_FOLDER = '/tmp/static/uploads'
-        STATIC_FOLDER = '/tmp/static'
+        # Deployed assets remain in the read-only project directory. Only
+        # user uploads and temporary serverless data belong in /tmp.
+        STATIC_FOLDER = os.path.join(PROJECT_ROOT, 'static')
     else:
         UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'static', 'uploads')
         STATIC_FOLDER = os.path.join(PROJECT_ROOT, 'static')
@@ -36,7 +38,7 @@ class Config:
         'Prefer': 'return=representation'
     }
 
-    DATA_FILE = os.path.join(PROJECT_ROOT, 'offline_data.json')
+    DATA_FILE = os.path.join('/tmp', 'offline_data.json') if IS_VERCEL else os.path.join(PROJECT_ROOT, 'offline_data.json')
 
     # ============================================================
     # M-PESA PRODUCTION CONFIGURATION - ACACIA MINIMART
