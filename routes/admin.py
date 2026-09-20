@@ -2835,8 +2835,14 @@ def api_sales_stats():
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        orders = load_orders()
-        products = load_products()
+        orders = load_orders() or []
+        products = load_products() or []
+        if not isinstance(orders, list):
+            orders = []
+        if not isinstance(products, list):
+            products = []
+        orders = [order for order in orders if isinstance(order, dict)]
+        products = [product for product in products if isinstance(product, dict)]
         today = datetime.utcnow().date()
 
         today_revenue = 0
@@ -2911,8 +2917,12 @@ def api_sales_stats():
         low_stock_count = 0
         out_of_stock_count = 0
         for p in products:
+            if not isinstance(p, dict):
+                continue
             stock = p.get('stock', 0)
-            if stock is None:
+            try:
+                stock = float(stock or 0)
+            except (TypeError, ValueError):
                 stock = 0
             if stock < 10 and stock > 0:
                 low_stock_count += 1
