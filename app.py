@@ -623,13 +623,6 @@ def load_sample_data():
         return jsonify({'success': False, 'error': str(exc)}), 500
 
 
-# ============================================================
-# FOR VERCEL
-# ============================================================
-def handler(request, context):
-    return app(request, context)
-
-
 if __name__ == '__main__':
     print('\n' + '=' * 60)
     print('📱 PRICE POINT - Premium Electronics Shop')
