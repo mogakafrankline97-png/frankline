@@ -70,7 +70,7 @@ application = app
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
 app.permanent_session_lifetime = Config.PERMANENT_SESSION_LIFETIME
-app.template_folder = 'templates'
+app.template_folder = os.path.join(Config.PROJECT_ROOT, 'templates')
 app.static_folder = Config.STATIC_FOLDER
 
 # ---------- REGISTER M-PESA TEST BLUEPRINT (debug only) ----------
@@ -82,7 +82,11 @@ except Exception as e:
     print(f"⚠️ M-Pesa test blueprint not loaded: {e}")
 # ---------- END DEBUG ----------
 
-os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+try:
+    os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+except OSError as e:
+    # Vercel's project directory is read-only; uploads use /tmp there.
+    print(f"⚠️ Upload directory unavailable: {e}")
 
 
 @app.template_filter('format_number')
@@ -124,7 +128,7 @@ app.register_blueprint(admin_bp)
 def manifest_root():
     """Serve manifest from root URL for PWA"""
     try:
-        return send_from_directory('static', 'manifest.json', mimetype='application/manifest+json')
+        return send_from_directory(Config.STATIC_FOLDER, 'manifest.json', mimetype='application/manifest+json')
     except Exception as e:
         print(f"❌ Error serving manifest: {e}")
         return "Manifest not found", 404
@@ -134,7 +138,7 @@ def manifest_root():
 def service_worker_root():
     """Serve service worker from root URL for PWA"""
     try:
-        return send_from_directory('static', 'sw.js', mimetype='application/javascript')
+        return send_from_directory(Config.STATIC_FOLDER, 'sw.js', mimetype='application/javascript')
     except Exception as e:
         print(f"❌ Error serving sw.js: {e}")
         return "Service Worker not found", 404
@@ -154,7 +158,7 @@ def offline_page_root():
 def favicon_root():
     """Serve favicon"""
     try:
-        return send_from_directory('static/icons', 'favicon.ico', mimetype='image/x-icon')
+        return send_from_directory(os.path.join(Config.STATIC_FOLDER, 'icons'), 'favicon.ico', mimetype='image/x-icon')
     except Exception as e:
         print(f"⚠️ Favicon not found: {e}")
         return "", 204
@@ -164,7 +168,7 @@ def favicon_root():
 def static_files_root(filename):
     """Serve static files"""
     try:
-        return send_from_directory('static', filename)
+        return send_from_directory(Config.STATIC_FOLDER, filename)
     except Exception as e:
         print(f"❌ Error serving static file: {e}")
         return "File not found", 404
@@ -249,7 +253,7 @@ def pos_page():
             ]
         
         return render_template('pos.html', 
-                             products=products, 
+                             products=products,
                              customers=customers,
                              credit_customers=credit_customers,
                              session=session)
