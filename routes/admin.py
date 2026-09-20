@@ -2171,29 +2171,47 @@ def api_add_user():
 @admin_bp.route('/admin/api/categories', methods=['GET'])
 @admin_required
 def api_get_categories():
-    categories = {}
+    """Get categories from Supabase + count products per category."""
+    try:
+        categories = {}
 
-    # 1. Load categories from Supabase categories table  ← NEW
-    resp = requests.get(
-        f"{Config.SUPABASE_URL}/rest/v1/categories?select=name,icon",
-        headers=Config.SUPABASE_HEADERS,
-        timeout=10
-    )
-    if resp.status_code == 200:
-        for c in resp.json() or []:
-            name = str(c.get('name', '')).strip()
-            if name:
-                categories[name] = {'name': name, 'icon': c.get('icon') or 'fa-tag', 'count': 0}
+        # 1. Load categories from Supabase
+        resp = requests.get(
+            f"{Config.SUPABASE_URL}/rest/v1/categories?select=name,icon",
+            headers=Config.SUPABASE_HEADERS,
+            timeout=10
+        )
+        if resp.status_code == 200:
+            for c in resp.json() or []:
+                name = str(c.get('name', '')).strip()
+                if name:
+                    categories[name] = {
+                        'name': name,
+                        'icon': c.get('icon') or 'fa-tag',
+                        'count': 0
+                    }
+        else:
+            print(f"⚠️ categories fetch status: {resp.status_code} {resp.text[:200]}")
 
-    # 2. Count products per category
-    prod_resp = requests.get(...)
-    for p in prod_resp.json() or []:
-        cat = str(p.get('category', '') or '').strip()
-        if cat not in categories:
-            categories[cat] = {'name': cat, 'icon': 'fa-tag', 'count': 0}
-        categories[cat]['count'] += 1
+        # 2. Count products per category
+        prod_resp = requests.get(
+            f"{Config.SUPABASE_URL}/rest/v1/products?select=category",
+            headers=Config.SUPABASE_HEADERS,
+            timeout=10
+        )
+        if prod_resp.status_code == 200:
+            for p in prod_resp.json() or []:
+                cat = str(p.get('category', '') or '').strip()
+                if not cat:
+                    continue
+                if cat not in categories:
+                    categories[cat] = {'name': cat, 'icon': 'fa-tag', 'count': 0}
+                categories[cat]['count'] += 1
 
-    return jsonify(categories)
+        if not categories:
+            categories = {'General': {'name': 'General', 'icon': 'fa-tag', 'count': 0}}
+
+        return jsonify(categories)
 
     except Exception as e:
         print(f"❌ Error loading categories: {e}")
