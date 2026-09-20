@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - PricePoint POS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        .offline-container { text-align: center; max-width: 400px; }
+        .icon { font-size: 80px; color: #f59e0b; margin-bottom: 20px; }
+        h1 { font-size: 2rem; margin-bottom: 10px; }
+        p { color: #94a3b8; margin-bottom: 20px; line-height: 1.6; }
+        .btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(5,150,105,0.3); }
+        .retry-btn { background: #2563eb; margin-left: 10px; }
+        .retry-btn:hover { box-shadow: 0 8px 25px rgba(37,99,235,0.3); }
+        .offline-orders {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .offline-orders h3 { font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px; }
+        .offline-orders p { font-size: 1.2rem; font-weight: 700; color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="icon">📡</div>
+        <h1>You're Offline</h1>
+        <p>Don't worry! PricePoint POS works offline.<br>
+        Your orders will be saved and synced when you're back online.</p>
+        
+        <div class="offline-orders" id="offlineOrders">
+            <h3>📋 Offline Orders Pending Sync</h3>
+            <p id="offlineCount">0</p>
+        </div>
+        
+        <div>
+            <a href="/static/pwa-entry.html" class="btn">Continue to POS</a>
+            <button class="btn retry-btn" onclick="location.reload()">🔄 Retry</button>
+        </div>
+        
+        <p style="font-size: 0.7rem; color: #475569; margin-top: 20px;">
+            💡 Tip: Your orders are safe and will sync automatically
+        </p>
+    </div>
+    
+    <script>
+        function getOfflineOrdersCount() {
+            try {
+                const orders = JSON.parse(localStorage.getItem('offline_orders') || '[]');
+                document.getElementById('offlineCount').textContent = orders.length;
+            } catch {
+                document.getElementById('offlineCount').textContent = '0';
+            }
+        }
+        getOfflineOrdersCount();
+        window.addEventListener('online', function() { location.reload(); });
+    </script>
+</body>
+</html>

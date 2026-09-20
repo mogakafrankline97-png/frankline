@@ -1,0 +1,1491 @@
+{% extends "layout.html" %}
+
+{% block title %}Credit Management · Price Point Kenya{% endblock %}
+
+{% block page_title %}Credit Management{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     CREDIT DASHBOARD
+     ============================================================ -->
+<div id="credit-section" class="section">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+            <h2 class="text-lg font-bold text-[#0f172a]">💰 Credit Management</h2>
+            <p class="text-sm text-gray-500">Manage customers who buy on credit and track payments</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+            <button onclick="showAddCreditCustomerModal()" class="btn-gradient text-sm py-2 px-4">
+                <i class="fas fa-user-plus"></i> Add Credit Customer
+            </button>
+            <button onclick="sendBulkWhatsAppReminders()" class="btn-success text-sm py-2 px-4" style="background: #25D366;">
+                <i class="fab fa-whatsapp"></i> Bulk WhatsApp
+            </button>
+            <button onclick="sendWhatsAppToOverdueCustomers()" class="btn-danger text-sm py-2 px-4">
+                <i class="fas fa-exclamation-triangle"></i> Overdue Alerts
+            </button>
+        </div>
+    </div>
+
+    <!-- Basic Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="stat-card p-3">
+            <p class="text-xs text-gray-500">Total Customers</p>
+            <p class="text-xl font-bold" id="totalCustomers">0</p>
+        </div>
+        <div class="stat-card p-3">
+            <p class="text-xs text-gray-500">Active Customers</p>
+            <p class="text-xl font-bold text-green-600" id="activeCustomers">0</p>
+        </div>
+        <div class="stat-card p-3">
+            <p class="text-xs text-gray-500">Total Outstanding</p>
+            <p class="text-xl font-bold text-amber-600" id="totalBalance">KSh 0</p>
+        </div>
+        <div class="stat-card p-3">
+            <p class="text-xs text-gray-500">Overdue Accounts</p>
+            <p class="text-xl font-bold text-red-600" id="overdueCount">0</p>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         CREDIT MONEY TRACKING
+         ============================================================ -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="stat-card p-3" style="border-left: 4px solid #7c3aed;">
+            <p class="text-xs text-gray-500">💰 Total Credit Sales</p>
+            <p class="text-xl font-bold text-purple-600" id="totalCreditSales">KSh 0</p>
+            <p class="text-xs text-gray-400">Lifetime credit sales</p>
+        </div>
+        <div class="stat-card p-3" style="border-left: 4px solid #059669;">
+            <p class="text-xs text-gray-500">✅ Total Payments Received</p>
+            <p class="text-xl font-bold text-green-600" id="totalPaymentsReceived">KSh 0</p>
+            <p class="text-xs text-gray-400">Money collected from credit</p>
+        </div>
+        <div class="stat-card p-3" style="border-left: 4px solid #f59e0b;">
+            <p class="text-xs text-gray-500">📊 Current Outstanding</p>
+            <p class="text-xl font-bold text-amber-600" id="currentOutstanding">KSh 0</p>
+            <p class="text-xs text-gray-400">Money still owed to you</p>
+        </div>
+        <div class="stat-card p-3" style="border-left: 4px solid #ef4444;">
+            <p class="text-xs text-gray-500">⚠️ Overdue Balance</p>
+            <p class="text-xl font-bold text-red-600" id="overdueBalance">KSh 0</p>
+            <p class="text-xs text-gray-400">Late payments</p>
+        </div>
+    </div>
+
+    <!-- Collection Rate -->
+    <div class="glass-card p-3 sm:p-4 mb-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-gray-500">📈 Collection Rate</p>
+                <p class="text-2xl font-bold text-blue-600" id="collectionRate">0%</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500">Total Credit Sales</p>
+                <p class="font-bold" id="collectionTotalSales">KSh 0</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500">Total Payments</p>
+                <p class="font-bold text-green-600" id="collectionTotalPayments">KSh 0</p>
+            </div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+            <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" id="collectionBar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MONTHLY CREDIT REPORT
+         ============================================================ -->
+    <div class="glass-card p-3 sm:p-4 mb-4">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-[#0f172a] text-sm sm:text-base">
+                <i class="fas fa-calendar-alt text-blue-500 mr-2"></i> Monthly Credit Summary
+            </h3>
+            <div class="flex gap-2">
+                <select id="reportYear" class="form-input text-xs py-1 px-2" onchange="loadMonthlyReport()">
+                    {% for year in range(now.year, now.year - 4, -1) %}
+                    <option value="{{ year }}" {% if year == now.year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+                <button onclick="loadMonthlyReport()" class="btn-outline text-xs py-1 px-2">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div class="table-wrap max-h-64 overflow-y-auto">
+            <table>
+                <thead class="sticky top-0 bg-white z-10">
+                    <tr>
+                        <th class="text-xs sm:text-sm">Month</th>
+                        <th class="text-right text-xs sm:text-sm">Sales</th>
+                        <th class="text-right text-xs sm:text-sm">Payments</th>
+                        <th class="text-right text-xs sm:text-sm">Net Change</th>
+                        <th class="text-right text-xs sm:text-sm">Transactions</th>
+                    </tr>
+                </thead>
+                <tbody id="monthlyReportTable">
+                    <tr><td colspan="5" class="text-center py-6 text-gray-400"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex flex-wrap gap-2 mb-4">
+        <button onclick="showAddCreditCustomerModal()" class="btn-gradient text-sm py-1.5 px-3">
+            <i class="fas fa-user-plus"></i> New Customer
+        </button>
+        <button onclick="openRecordPaymentModal()" class="btn-success text-sm py-1.5 px-3">
+            <i class="fas fa-money-bill-wave"></i> Record Payment
+        </button>
+        <button onclick="showOverdueCustomers()" class="btn-danger text-sm py-1.5 px-3">
+            <i class="fas fa-exclamation-triangle"></i> View Overdue
+        </button>
+        <button onclick="sendBulkWhatsAppReminders()" class="btn-success text-sm py-1.5 px-3" style="background: #25D366;">
+            <i class="fab fa-whatsapp"></i> Bulk WhatsApp
+        </button>
+        <button onclick="refreshCreditData()" class="btn-outline text-sm py-1.5 px-3">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+        <button onclick="window.printToUSBPrinter ? showToast('✅ Printer ready!', 'success') : showToast('⚠️ Printer not connected', 'warning')" class="btn-outline text-sm py-1.5 px-3" style="border-color: #7c3aed; color: #7c3aed;">
+            <i class="fas fa-print"></i> Check Printer
+        </button>
+        <button onclick="window.connectUSBPrinter ? window.connectUSBPrinter() : showToast('⚠️ USB printing not available', 'warning')" class="btn-gradient text-sm py-1.5 px-3" style="background: linear-gradient(135deg,#6366f1,#4f46e5);">
+            <i class="fas fa-plug"></i> Connect Printer
+        </button>
+    </div>
+
+    <!-- Search -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-4">
+        <div class="relative flex-1">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="searchCreditCustomers" placeholder="Search by name, phone, or ID..." 
+                   class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition outline-none"
+                   oninput="filterCreditCustomers(this.value)">
+        </div>
+        <div class="flex gap-2">
+            <select id="statusFilter" class="form-input py-2 px-3" onchange="filterCreditCustomers()">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <select id="balanceFilter" class="form-input py-2 px-3" onchange="filterCreditCustomers()">
+                <option value="all">All Balances</option>
+                <option value="has_balance">Has Balance</option>
+                <option value="over_limit">Over Limit</option>
+                <option value="zero">Zero Balance</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Credit Customers Table -->
+    <div class="glass-card p-0 overflow-hidden">
+        <div class="table-wrap max-h-[500px] overflow-y-auto">
+            <table>
+                <thead class="sticky top-0 bg-white z-10">
+                    <tr>
+                        <th class="text-sm">Customer</th>
+                        <th class="text-sm hidden sm:table-cell">Phone</th>
+                        <th class="text-sm hidden md:table-cell">Credit Limit</th>
+                        <th class="text-sm text-center">Balance</th>
+                        <th class="text-sm text-center hidden lg:table-cell">Status</th>
+                        <th class="text-sm text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="creditCustomersTableBody">
+                    <tr><td colspan="6" class="text-center py-6 text-gray-400"><i class="fas fa-spinner fa-spin"></i> Loading customers...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     ADD/EDIT CREDIT CUSTOMER MODAL
+     ============================================================ -->
+<div id="creditCustomerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 id="creditModalTitle" class="font-bold text-lg">Add Credit Customer</h3>
+            <button onclick="closeCreditCustomerModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        
+        <form id="creditCustomerForm" onsubmit="saveCreditCustomer(event)" class="p-4 space-y-4">
+            <input type="hidden" id="editCreditCustomerId">
+            <input type="hidden" id="creditAccountStatus" value="active">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Personal Information -->
+                <div>
+                    <label class="form-label text-sm font-semibold">Full Name *</label>
+                    <input type="text" id="creditFullName" class="form-input w-full" placeholder="e.g., John Mwangi" required>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Phone Number *</label>
+                    <input type="tel" id="creditPhone" class="form-input w-full" placeholder="e.g., 0712345678" required>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Secondary Phone</label>
+                    <input type="tel" id="creditPhone2" class="form-input w-full" placeholder="e.g., 0723456789">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">WhatsApp Number</label>
+                    <input type="tel" id="creditWhatsapp" class="form-input w-full" placeholder="e.g., 0712345678">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Email Address</label>
+                    <input type="email" id="creditEmail" class="form-input w-full" placeholder="e.g., john@example.com">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">ID Number</label>
+                    <input type="text" id="creditIdNumber" class="form-input w-full" placeholder="e.g., 12345678">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">ID Type</label>
+                    <select id="creditIdType" class="form-input w-full">
+                        <option value="National ID">National ID</option>
+                        <option value="Passport">Passport</option>
+                        <option value="Driving License">Driving License</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Employer</label>
+                    <input type="text" id="creditEmployer" class="form-input w-full" placeholder="e.g., Safaricom">
+                </div>
+                
+                <!-- Credit Terms -->
+                <div>
+                    <label class="form-label text-sm font-semibold">Credit Limit</label>
+                    <input type="number" id="creditLimit" class="form-input w-full" placeholder="e.g., 50000" value="0">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Payment Terms</label>
+                    <select id="creditPaymentTerms" class="form-input w-full">
+                        <option value="7 days">7 days</option>
+                        <option value="14 days">14 days</option>
+                        <option value="30 days" selected>30 days</option>
+                        <option value="45 days">45 days</option>
+                        <option value="60 days">60 days</option>
+                        <option value="90 days">90 days</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Interest Rate (%)</label>
+                    <input type="number" id="creditInterestRate" class="form-input w-full" placeholder="e.g., 5" value="0" step="0.5">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Late Fee</label>
+                    <input type="number" id="creditLateFee" class="form-input w-full" placeholder="e.g., 500" value="0">
+                </div>
+                
+                <!-- Address -->
+                <div class="md:col-span-2">
+                    <label class="form-label text-sm font-semibold">Physical Address</label>
+                    <textarea id="creditAddress" class="form-input w-full" rows="2" placeholder="e.g., Nairobi, CBD, Moi Avenue"></textarea>
+                </div>
+                
+                <!-- Notes -->
+                <div class="md:col-span-2">
+                    <label class="form-label text-sm font-semibold">Notes</label>
+                    <textarea id="creditNotes" class="form-input w-full" rows="2" placeholder="Any additional notes about this customer..."></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 pt-3 border-t">
+                <button type="submit" class="btn-gradient flex-1 py-2">
+                    <i class="fas fa-save"></i> Save Customer
+                </button>
+                <button type="button" onclick="closeCreditCustomerModal()" class="btn-outline py-2 px-6">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+     RECORD PAYMENT MODAL
+     ============================================================ -->
+<div id="paymentModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl">
+        <div class="p-4 border-b flex items-center justify-between">
+            <h3 class="font-bold text-lg">💰 Record Payment</h3>
+            <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        
+        <form id="paymentForm" onsubmit="savePayment(event)" class="p-4 space-y-4">
+            <input type="hidden" id="paymentCustomerId">
+            
+            <div>
+                <label class="form-label text-sm font-semibold">Customer</label>
+                <p id="paymentCustomerName" class="font-semibold text-lg">-</p>
+                <p id="paymentCurrentBalance" class="text-sm text-gray-500">Current Balance: KSh 0</p>
+            </div>
+            
+            <div>
+                <label class="form-label text-sm font-semibold">Payment Amount *</label>
+                <input type="number" id="paymentAmount" class="form-input w-full" placeholder="Enter amount" required min="1" step="1">
+            </div>
+            
+            <div>
+                <label class="form-label text-sm font-semibold">Payment Method</label>
+                <select id="paymentMethodSelect" class="form-input w-full">
+                    <option value="cash">💵 Cash</option>
+                    <option value="mpesa">📱 M-Pesa</option>
+                    <option value="bank">🏦 Bank Transfer</option>
+                    <option value="cheque">📄 Cheque</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="form-label text-sm font-semibold">Notes</label>
+                <textarea id="paymentNotes" class="form-input w-full" rows="2" placeholder="Optional notes..."></textarea>
+            </div>
+            
+            <div class="flex gap-3 pt-3 border-t">
+                <button type="submit" class="btn-success flex-1 py-2">
+                    <i class="fas fa-check"></i> Record Payment
+                </button>
+                <button type="button" onclick="closePaymentModal()" class="btn-outline py-2 px-6">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+     VIEW CUSTOMER MODAL
+     ============================================================ -->
+<div id="viewCreditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 class="font-bold text-lg">Customer Details</h3>
+            <button onclick="closeViewCreditModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="viewCreditContent" class="p-4">
+            <!-- Content loaded via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     TRANSACTION HISTORY MODAL
+     ============================================================ -->
+<div id="historyModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 class="font-bold text-lg">Transaction History</h3>
+            <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="historyContent" class="p-4">
+            <!-- Content loaded via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     OVERDUE CUSTOMERS MODAL
+     ============================================================ -->
+<div id="overdueModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 class="font-bold text-lg text-red-600">⚠️ Overdue Accounts</h3>
+            <button onclick="closeOverdueModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="overdueContent" class="p-4">
+            <!-- Content loaded via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT - COMPLETE FIXED VERSION
+     ============================================================ -->
+<script>
+// ============================================================
+// TOAST NOTIFICATION
+// ============================================================
+function showToast(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        danger: 'bg-red-500',
+        warning: 'bg-amber-500',
+        info: 'bg-blue-500'
+    };
+    
+    const existingToasts = document.querySelectorAll('.custom-toast');
+    existingToasts.forEach(t => t.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `custom-toast fixed bottom-4 right-4 z-50 ${colors[type] || 'bg-gray-800'} text-white px-4 py-3 rounded-xl shadow-lg text-sm max-w-md transform transition-all duration-300 translate-y-full opacity-0`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    });
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(100%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+// ============================================================
+// LOAD CREDIT CUSTOMERS
+// ============================================================
+
+function loadCreditCustomers() {
+    const tbody = document.getElementById('creditCustomersTableBody');
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-gray-400"><i class="fas fa-spinner fa-spin"></i> Loading customers...</td></tr>';
+    
+    fetch('/admin/api/credit/customers')
+        .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+            console.log('📊 Credit customers response:', data);
+            
+            const customers = data.customers || data.data || [];
+            
+            if (customers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-gray-400">No credit customers found</td></tr>';
+                updateStats([]);
+                return;
+            }
+            
+            renderCreditCustomers(customers);
+            updateStats(customers);
+        })
+        .catch(err => {
+            console.error('Error loading credit customers:', err);
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-400">Error loading customers: ${err.message}</td></tr>`;
+        });
+}
+
+// ============================================================
+// RENDER CREDIT CUSTOMERS
+// ============================================================
+
+function renderCreditCustomers(customers) {
+    const tbody = document.getElementById('creditCustomersTableBody');
+    
+    if (!customers || customers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-gray-400">No credit customers found</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    customers.forEach(customer => {
+        const balance = customer.current_balance || 0;
+        const limit = customer.credit_limit || 0;
+        const status = customer.account_status || 'active';
+        
+        let balanceClass = 'text-gray-400';
+        if (balance > limit) {
+            balanceClass = 'text-red-600 font-bold';
+        } else if (balance > limit * 0.8 && limit > 0) {
+            balanceClass = 'text-amber-600 font-bold';
+        } else if (balance > 0) {
+            balanceClass = 'text-blue-600 font-bold';
+        }
+        
+        html += `
+            <tr class="credit-row" 
+                data-name="${customer.full_name || ''}" 
+                data-phone="${customer.phone || ''}" 
+                data-status="${status}" 
+                data-balance="${balance}" 
+                data-limit="${limit}"
+                data-customer-id="${customer.customer_id || ''}">
+                <td>
+                    <div>
+                        <p class="font-semibold">${customer.full_name || 'N/A'}</p>
+                        <p class="text-xs text-gray-400 font-mono">${customer.customer_id || 'N/A'}</p>
+                    </div>
+                </td>
+                <td class="hidden sm:table-cell">
+                    <a href="tel:${customer.phone}" class="text-blue-600 hover:underline">${customer.phone || 'N/A'}</a>
+                    ${customer.whatsapp_number ? `<br><small class="text-green-600"><i class="fab fa-whatsapp"></i> WhatsApp</small>` : ''}
+                    <br>
+                    <button onclick="sendWhatsAppCustomMessage('${customer.customer_id}', '${customer.full_name}', '${customer.phone}')" 
+                            class="text-xs text-green-600 hover:underline">
+                        <i class="fab fa-whatsapp"></i> Message
+                    </button>
+                </td>
+                <td class="hidden md:table-cell">KSh ${(limit || 0).toLocaleString()}</td>
+                <td class="text-center">
+                    <span class="${balanceClass}">KSh ${(balance).toLocaleString()}</span>
+                    ${balance > limit ? '<span class="badge badge-danger text-xs ml-1">Over Limit</span>' : ''}
+                    ${balance > limit * 0.8 && balance <= limit && limit > 0 ? '<span class="badge badge-warning text-xs ml-1">Near Limit</span>' : ''}
+                </td>
+                <td class="text-center hidden lg:table-cell">
+                    <span class="badge ${status === 'active' ? 'badge-success' : 'badge-danger'}">${status || 'Unknown'}</span>
+                </td>
+                <td>
+                    <div class="flex gap-1 justify-center flex-wrap">
+                        <button onclick="viewCreditCustomer('${customer.customer_id}')" class="btn-outline text-xs px-2 py-1" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editCreditCustomer('${customer.customer_id}')" class="btn-outline text-xs px-2 py-1" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="openRecordPaymentModal('${customer.customer_id}', '${customer.full_name}', '${balance}')" class="btn-success text-xs px-2 py-1" title="Record Payment">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </button>
+                        <button onclick="viewTransactionHistory('${customer.customer_id}')" class="btn-outline text-xs px-2 py-1 text-purple-600" title="History">
+                            <i class="fas fa-history"></i>
+                        </button>
+                        <button onclick="sendWhatsAppReminder('${customer.customer_id}', '${customer.full_name}', '${balance}', '${customer.phone}')" 
+                                class="btn-success text-xs px-2 py-1" title="Send WhatsApp Reminder" style="background: #25D366;">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// ============================================================
+// UPDATE STATS
+// ============================================================
+
+function updateStats(customers) {
+    const active = customers.filter(c => c.account_status === 'active').length;
+    const totalBalance = customers.reduce((sum, c) => sum + (c.current_balance || 0), 0);
+    const totalPurchases = customers.reduce((sum, c) => sum + (c.total_purchases || 0), 0);
+    const totalPayments = customers.reduce((sum, c) => sum + (c.total_payments || 0), 0);
+    const overdue = customers.filter(c => c.current_balance > c.credit_limit * 0.5).length;
+    
+    document.getElementById('totalCustomers').textContent = customers.length;
+    document.getElementById('activeCustomers').textContent = active;
+    document.getElementById('totalBalance').textContent = 'KSh ' + totalBalance.toLocaleString();
+    document.getElementById('overdueCount').textContent = overdue;
+    
+    document.getElementById('totalCreditSales').textContent = 'KSh ' + totalPurchases.toLocaleString();
+    document.getElementById('totalPaymentsReceived').textContent = 'KSh ' + totalPayments.toLocaleString();
+    document.getElementById('currentOutstanding').textContent = 'KSh ' + totalBalance.toLocaleString();
+    
+    const collectionRate = totalPurchases > 0 ? ((totalPayments / totalPurchases) * 100) : 0;
+    document.getElementById('collectionRate').textContent = collectionRate.toFixed(1) + '%';
+    document.getElementById('collectionTotalSales').textContent = 'KSh ' + totalPurchases.toLocaleString();
+    document.getElementById('collectionTotalPayments').textContent = 'KSh ' + totalPayments.toLocaleString();
+    document.getElementById('collectionBar').style.width = Math.min(collectionRate, 100) + '%';
+}
+
+// ============================================================
+// MONTHLY CREDIT REPORT
+// ============================================================
+
+function loadMonthlyReport() {
+    const year = document.getElementById('reportYear')?.value || new Date().getFullYear();
+    
+    fetch('/admin/api/credit/monthly-report?year=' + year)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const tbody = document.getElementById('monthlyReportTable');
+                const report = data.report || [];
+                
+                if (report.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-400">No data for ' + year + '</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                let totalSales = 0;
+                let totalPayments = 0;
+                let totalNet = 0;
+                let totalTx = 0;
+                
+                report.forEach(r => {
+                    totalSales += r.total_credit_sales || 0;
+                    totalPayments += r.total_payments || 0;
+                    totalNet += r.net_change || 0;
+                    totalTx += r.transactions_count || 0;
+                    
+                    const netClass = r.net_change >= 0 ? 'text-green-600' : 'text-red-600';
+                    html += `<tr>
+                        <td class="text-xs sm:text-sm font-semibold">${r.month}</td>
+                        <td class="text-right text-xs sm:text-sm text-purple-600 font-semibold">KSh ${(r.total_credit_sales || 0).toLocaleString()}</td>
+                        <td class="text-right text-xs sm:text-sm text-green-600 font-semibold">KSh ${(r.total_payments || 0).toLocaleString()}</td>
+                        <td class="text-right text-xs sm:text-sm font-bold ${netClass}">KSh ${(r.net_change || 0).toLocaleString()}</td>
+                        <td class="text-center text-xs sm:text-sm">${r.transactions_count || 0}</td>
+                    </tr>`;
+                });
+                
+                html += `<tr class="bg-gray-50 font-bold border-t-2 border-gray-300">
+                    <td class="text-xs sm:text-sm">TOTAL</td>
+                    <td class="text-right text-xs sm:text-sm text-purple-600">KSh ${totalSales.toLocaleString()}</td>
+                    <td class="text-right text-xs sm:text-sm text-green-600">KSh ${totalPayments.toLocaleString()}</td>
+                    <td class="text-right text-xs sm:text-sm ${totalNet >= 0 ? 'text-green-600' : 'text-red-600'}">KSh ${totalNet.toLocaleString()}</td>
+                    <td class="text-center text-xs sm:text-sm">${totalTx}</td>
+                </tr>`;
+                
+                tbody.innerHTML = html;
+            }
+        })
+        .catch(e => {
+            console.error('Error loading monthly report:', e);
+            document.getElementById('monthlyReportTable').innerHTML = '<tr><td colspan="5" class="text-center py-6 text-red-400">Error loading data</td></tr>';
+        });
+}
+
+// ============================================================
+// CREDIT CUSTOMER CRUD FUNCTIONS
+// ============================================================
+
+function showAddCreditCustomerModal() {
+    document.getElementById('creditModalTitle').textContent = 'Add Credit Customer';
+    document.getElementById('creditCustomerForm').reset();
+    document.getElementById('editCreditCustomerId').value = '';
+    document.getElementById('creditCustomerModal').classList.remove('hidden');
+}
+
+function closeCreditCustomerModal() {
+    document.getElementById('creditCustomerModal').classList.add('hidden');
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentModal').classList.add('hidden');
+}
+
+function closeViewCreditModal() {
+    document.getElementById('viewCreditModal').classList.add('hidden');
+}
+
+function closeHistoryModal() {
+    document.getElementById('historyModal').classList.add('hidden');
+}
+
+function closeOverdueModal() {
+    document.getElementById('overdueModal').classList.add('hidden');
+}
+
+// ============================================================
+// OPEN RECORD PAYMENT MODAL
+// ============================================================
+
+function openRecordPaymentModal(customerId, customerName, currentBalance) {
+    if (!customerId) {
+        const row = document.querySelector('.credit-row');
+        if (row) {
+            customerId = row.dataset.customerId || '';
+            customerName = row.dataset.name || 'Customer';
+            currentBalance = row.dataset.balance || '0';
+        }
+    }
+    
+    if (!customerId) {
+        showToast('Please select a customer first', 'warning');
+        return;
+    }
+    
+    document.getElementById('paymentCustomerId').value = customerId;
+    document.getElementById('paymentCustomerName').textContent = customerName || 'Customer';
+    document.getElementById('paymentCurrentBalance').textContent = 'Current Balance: KSh ' + parseFloat(currentBalance || 0).toLocaleString();
+    document.getElementById('paymentAmount').value = '';
+    document.getElementById('paymentNotes').value = '';
+    document.getElementById('paymentModal').classList.remove('hidden');
+}
+
+// ============================================================
+// RECORD PAYMENT
+// ============================================================
+
+function savePayment(event) {
+    event.preventDefault();
+    
+    const customerId = document.getElementById('paymentCustomerId').value;
+    const amount = parseFloat(document.getElementById('paymentAmount').value);
+    const paymentMethod = document.getElementById('paymentMethodSelect').value;
+    const notes = document.getElementById('paymentNotes').value.trim();
+    
+    if (!customerId) {
+        showToast('No customer selected', 'danger');
+        return;
+    }
+    
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'danger');
+        return;
+    }
+    
+    const data = {
+        customer_id: customerId,
+        amount: amount,
+        staff_name: 'Admin',
+        payment_method: paymentMethod,
+        notes: notes || 'Payment via ' + paymentMethod
+    };
+    
+    showToast('Processing payment...', 'info');
+    
+    fetch('/admin/api/credit/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || `HTTP ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showToast(data.message || '✅ Payment recorded successfully!', 'success');
+            document.getElementById('paymentModal').classList.add('hidden');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('❌ ' + (data.message || 'Failed to record payment'), 'danger');
+        }
+    })
+    .catch(err => {
+        console.error('❌ Payment error:', err);
+        showToast('❌ Error recording payment: ' + err.message, 'danger');
+    });
+}
+
+function editCreditCustomer(customerId) {
+    showToast('Loading customer details...', 'info');
+    
+    fetch('/admin/api/credit/customers/' + customerId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.customer) {
+                const c = data.customer;
+                document.getElementById('creditModalTitle').textContent = 'Edit Credit Customer';
+                document.getElementById('editCreditCustomerId').value = customerId;
+                document.getElementById('creditFullName').value = c.full_name || '';
+                document.getElementById('creditPhone').value = c.phone || '';
+                document.getElementById('creditPhone2').value = c.phone2 || '';
+                document.getElementById('creditWhatsapp').value = c.whatsapp_number || '';
+                document.getElementById('creditEmail').value = c.email || '';
+                document.getElementById('creditIdNumber').value = c.id_number || '';
+                document.getElementById('creditIdType').value = c.id_type || 'National ID';
+                document.getElementById('creditEmployer').value = c.employer || '';
+                document.getElementById('creditLimit').value = c.credit_limit || 0;
+                document.getElementById('creditPaymentTerms').value = c.payment_terms || '30 days';
+                document.getElementById('creditInterestRate').value = c.interest_rate || 0;
+                document.getElementById('creditLateFee').value = c.late_fee || 0;
+                document.getElementById('creditAddress').value = c.address || '';
+                document.getElementById('creditNotes').value = c.notes || '';
+                document.getElementById('creditCustomerModal').classList.remove('hidden');
+                showToast('Customer loaded successfully', 'success');
+            } else {
+                showToast('Customer not found', 'danger');
+            }
+        })
+        .catch(e => {
+            console.error('Error loading customer:', e);
+            showToast('Error loading customer: ' + e.message, 'danger');
+        });
+}
+
+function viewCreditCustomer(customerId) {
+    showToast('Loading customer details...', 'info');
+    
+    fetch('/admin/api/credit/customers/' + customerId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.customer) {
+                const c = data.customer;
+                const balanceClass = c.current_balance > c.credit_limit ? 'text-red-600' : 
+                                    c.current_balance > (c.credit_limit * 0.8) ? 'text-amber-600' : 
+                                    c.current_balance > 0 ? 'text-blue-600' : 'text-gray-400';
+                
+                const content = `
+                    <div class="space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="text-xl font-bold">${c.full_name || 'N/A'}</h4>
+                                <p class="text-gray-400 font-mono text-sm">${c.customer_id || 'N/A'}</p>
+                            </div>
+                            <span class="badge ${c.account_status === 'active' ? 'badge-success' : 'badge-danger'}">${c.account_status || 'Unknown'}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-400">Phone</p>
+                                <p class="font-semibold"><a href="tel:${c.phone}" class="text-blue-600">${c.phone || 'N/A'}</a></p>
+                                ${c.whatsapp_number ? `<p class="text-sm text-green-600"><i class="fab fa-whatsapp"></i> ${c.whatsapp_number}</p>` : ''}
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Email</p>
+                                <p class="font-semibold">${c.email || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">ID Number</p>
+                                <p class="font-semibold">${c.id_number || 'N/A'} (${c.id_type || 'National ID'})</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Employer</p>
+                                <p class="font-semibold">${c.employer || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Credit Limit</p>
+                                <p class="font-semibold">KSh ${(c.credit_limit || 0).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Current Balance</p>
+                                <p class="font-bold ${balanceClass}">KSh ${(c.current_balance || 0).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Payment Terms</p>
+                                <p class="font-semibold">${c.payment_terms || '30 days'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Total Purchases</p>
+                                <p class="font-semibold">KSh ${(c.total_purchases || 0).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Total Payments</p>
+                                <p class="font-semibold text-green-600">KSh ${(c.total_payments || 0).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Last Payment</p>
+                                <p class="font-semibold">${c.last_payment_date || 'N/A'}</p>
+                            </div>
+                        </div>
+                        
+                        ${c.address ? `<div><p class="text-xs text-gray-400">Address</p><p>${c.address}</p></div>` : ''}
+                        ${c.notes ? `<div><p class="text-xs text-gray-400">Notes</p><p class="text-sm">${c.notes}</p></div>` : ''}
+                        
+                        <div class="flex gap-2 pt-3 border-t flex-wrap">
+                            <button onclick="openRecordPaymentModal('${c.customer_id}', '${c.full_name}', '${c.current_balance || 0}'); closeViewCreditModal();" class="btn-success text-sm py-2 px-4">
+                                <i class="fas fa-money-bill-wave"></i> Record Payment
+                            </button>
+                            <button onclick="viewTransactionHistory('${c.customer_id}'); closeViewCreditModal();" class="btn-outline text-sm py-2 px-4 text-purple-600">
+                                <i class="fas fa-history"></i> History
+                            </button>
+                            <button onclick="editCreditCustomer('${c.customer_id}'); closeViewCreditModal();" class="btn-gradient text-sm py-2 px-4">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="sendWhatsAppReminder('${c.customer_id}', '${c.full_name}', '${c.current_balance || 0}', '${c.phone}')" 
+                                    class="btn-success text-sm py-2 px-4" style="background: #25D366;">
+                                <i class="fab fa-whatsapp"></i> Send Reminder
+                            </button>
+                            <button onclick="closeViewCreditModal()" class="btn-outline text-sm py-2 px-4">Close</button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('viewCreditContent').innerHTML = content;
+                document.getElementById('viewCreditModal').classList.remove('hidden');
+                showToast('Customer loaded successfully', 'success');
+            } else {
+                showToast('Customer not found', 'danger');
+            }
+        })
+        .catch(e => {
+            console.error('Error loading customer:', e);
+            showToast('Error loading customer: ' + e.message, 'danger');
+        });
+}
+
+function viewTransactionHistory(customerId) {
+    showToast('Loading transaction history...', 'info');
+    
+    fetch('/admin/api/credit/transactions/' + customerId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const transactions = data.transactions || [];
+                let html = `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-500">Total Transactions: ${transactions.length}</p>
+                        <div class="table-wrap max-h-96 overflow-y-auto">
+                            <table>
+                                <thead class="sticky top-0 bg-white">
+                                    <tr>
+                                        <th class="text-xs">Date</th>
+                                        <th class="text-xs">Type</th>
+                                        <th class="text-xs text-right">Amount</th>
+                                        <th class="text-xs text-right">Balance</th>
+                                        <th class="text-xs">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                if (transactions.length === 0) {
+                    html += `<tr><td colspan="5" class="text-center py-6 text-gray-400">No transactions found</td></tr>`;
+                } else {
+                    transactions.forEach(t => {
+                        const typeClass = t.transaction_type === 'payment' ? 'text-green-600' : 'text-blue-600';
+                        const typeIcon = t.transaction_type === 'payment' ? '💰' : '🛍️';
+                        const statusBadge = t.payment_status === 'paid' ? 'badge-success' : 'badge-warning';
+                        html += `
+                            <tr>
+                                <td class="text-xs">${t.created_at ? t.created_at.slice(0, 10) : 'N/A'}</td>
+                                <td class="text-xs ${typeClass}">${typeIcon} ${t.transaction_type || 'Unknown'}</td>
+                                <td class="text-xs text-right ${typeClass}">KSh ${(t.amount || 0).toLocaleString()}</td>
+                                <td class="text-xs text-right font-semibold">KSh ${(t.balance_after || 0).toLocaleString()}</td>
+                                <td><span class="badge ${statusBadge} text-xs">${t.payment_status || 'pending'}</span></td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('historyContent').innerHTML = html;
+                document.getElementById('historyModal').classList.remove('hidden');
+                showToast('History loaded successfully', 'success');
+            } else {
+                showToast('Error loading history: ' + (data.message || 'Unknown error'), 'danger');
+            }
+        })
+        .catch(e => {
+            console.error('Error loading history:', e);
+            showToast('Error loading history: ' + e.message, 'danger');
+        });
+}
+
+// ============================================================
+// SAVE CREDIT CUSTOMER - FIXED AND WORKING
+// ============================================================
+
+function saveCreditCustomer(event) {
+    event.preventDefault();
+    
+    console.log('🟢 Form submitted - saveCreditCustomer called');
+    
+    // Get ALL form values
+    const fullName = document.getElementById('creditFullName')?.value?.trim() || '';
+    const phone = document.getElementById('creditPhone')?.value?.trim() || '';
+    
+    // Validate required fields
+    if (!fullName || !phone) {
+        showToast('⚠️ Full name and phone are required', 'danger');
+        return;
+    }
+    
+    // Build data object - matches what the API expects
+    const data = {
+        full_name: fullName,
+        phone: phone,
+        phone2: document.getElementById('creditPhone2')?.value?.trim() || '',
+        whatsapp_number: document.getElementById('creditWhatsapp')?.value?.trim() || '',
+        email: document.getElementById('creditEmail')?.value?.trim() || '',
+        id_number: document.getElementById('creditIdNumber')?.value?.trim() || '',
+        id_type: document.getElementById('creditIdType')?.value || 'National ID',
+        employer: document.getElementById('creditEmployer')?.value?.trim() || '',
+        credit_limit: parseFloat(document.getElementById('creditLimit')?.value) || 0,
+        payment_terms: document.getElementById('creditPaymentTerms')?.value || '30 days',
+        interest_rate: parseFloat(document.getElementById('creditInterestRate')?.value) || 0,
+        late_fee: parseFloat(document.getElementById('creditLateFee')?.value) || 0,
+        address: document.getElementById('creditAddress')?.value?.trim() || '',
+        notes: document.getElementById('creditNotes')?.value?.trim() || '',
+        account_status: 'active'
+    };
+    
+    console.log('📤 Sending data:', data);
+    
+    showToast('Saving customer...', 'info');
+    
+    fetch('/admin/api/credit/customers', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('📥 Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('📥 Response data:', data);
+        if (data.success) {
+            showToast('✅ Customer added successfully!', 'success');
+            closeCreditCustomerModal();
+            // Refresh the table after a moment
+            setTimeout(() => {
+                loadCreditCustomers();
+            }, 500);
+        } else {
+            const errorMsg = data.message || data.error || 'Unknown error';
+            showToast('❌ Error: ' + errorMsg, 'danger');
+            console.log('❌ Server error:', data);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Fetch error:', error);
+        showToast('❌ Error: ' + error.message, 'danger');
+    });
+}
+
+function showOverdueCustomers() {
+    showToast('Loading overdue customers...', 'info');
+    
+    fetch('/admin/api/credit/overdue')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const overdue = data.overdue || [];
+                let html = `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-500">${overdue.length} overdue accounts</p>
+                        <div class="table-wrap max-h-96 overflow-y-auto">
+                            <table>
+                                <thead class="sticky top-0 bg-white">
+                                    <tr>
+                                        <th class="text-xs">Customer</th>
+                                        <th class="text-xs text-right">Balance</th>
+                                        <th class="text-xs">Due Date</th>
+                                        <th class="text-xs text-center">Days Overdue</th>
+                                        <th class="text-xs text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                if (overdue.length === 0) {
+                    html += `<tr><td colspan="5" class="text-center py-6 text-green-600">✅ No overdue accounts!</td></tr>`;
+                } else {
+                    overdue.forEach(item => {
+                        const customer = item.customer || item;
+                        const customerId = customer.customer_id || item.customer_id || '';
+                        const customerName = customer.full_name || item.full_name || 'Unknown';
+                        const balance = customer.current_balance || item.balance || 0;
+                        const phone = customer.phone || item.phone || '';
+                        
+                        html += `
+                            <tr>
+                                <td class="text-xs font-semibold">${customerName}</td>
+                                <td class="text-xs text-right text-red-600 font-bold">KSh ${(balance).toLocaleString()}</td>
+                                <td class="text-xs">${item.due_date || 'N/A'}</td>
+                                <td class="text-xs text-center text-red-600 font-bold">${item.days_overdue || 0} days</td>
+                                <td class="text-xs text-center">
+                                    <button onclick="openRecordPaymentModal('${customerId}', '${customerName}', '${balance}'); closeOverdueModal();" class="btn-success text-xs px-2 py-1">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </button>
+                                    <button onclick="sendWhatsAppReminder('${customerId}', '${customerName}', '${balance}', '${phone}')" 
+                                            class="btn-success text-xs px-2 py-1" style="background: #25D366;">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('overdueContent').innerHTML = html;
+                document.getElementById('overdueModal').classList.remove('hidden');
+                showToast('Overdue customers loaded', 'success');
+            } else {
+                showToast('Error loading overdue customers: ' + (data.message || 'Unknown error'), 'danger');
+            }
+        })
+        .catch(e => {
+            console.error('Error loading overdue customers:', e);
+            showToast('Error loading overdue customers: ' + e.message, 'danger');
+        });
+}
+
+function filterCreditCustomers() {
+    const search = document.getElementById('searchCreditCustomers')?.value?.toLowerCase() || '';
+    const status = document.getElementById('statusFilter')?.value || 'all';
+    const balanceFilter = document.getElementById('balanceFilter')?.value || 'all';
+    const rows = document.querySelectorAll('#creditCustomersTableBody .credit-row');
+    
+    rows.forEach(row => {
+        const name = (row.dataset.name || '').toLowerCase();
+        const phone = (row.dataset.phone || '').toLowerCase();
+        const rowStatus = row.dataset.status || 'active';
+        const balance = parseFloat(row.dataset.balance || 0);
+        const limit = parseFloat(row.dataset.limit || 0);
+        
+        const matchSearch = !search || name.includes(search) || phone.includes(search);
+        const matchStatus = status === 'all' || rowStatus === status;
+        
+        let matchBalance = true;
+        if (balanceFilter === 'has_balance') matchBalance = balance > 0;
+        else if (balanceFilter === 'over_limit') matchBalance = balance > limit;
+        else if (balanceFilter === 'zero') matchBalance = balance === 0;
+        
+        row.style.display = (matchSearch && matchStatus && matchBalance) ? '' : 'none';
+    });
+}
+
+function refreshCreditData() {
+    loadMonthlyReport();
+    loadCreditCustomers();
+    showToast('✅ Data refreshed!', 'success');
+}
+
+// ============================================================
+// WHATSAPP FUNCTIONS
+// ============================================================
+
+function openWhatsApp(phone, message) {
+    if (!phone || phone === 'None' || phone === '' || phone === 'N/A') {
+        showToast('❌ No phone number available for this customer', 'danger');
+        return false;
+    }
+    
+    let phoneNumber = phone.replace(/\D/g, '');
+    
+    if (phoneNumber.startsWith('0')) {
+        phoneNumber = '254' + phoneNumber.substring(1);
+    } else if (!phoneNumber.startsWith('254') && phoneNumber.length === 10) {
+        phoneNumber = '254' + phoneNumber;
+    } else if (!phoneNumber.startsWith('254') && phoneNumber.length === 9) {
+        phoneNumber = '254' + phoneNumber;
+    }
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+    return true;
+}
+
+function sendWhatsAppReminder(customerId, customerName, balance, phone) {
+    if (!phone || phone === 'None' || phone === '' || phone === 'N/A') {
+        showToast('❌ No phone number available for this customer', 'danger');
+        return;
+    }
+    
+    const message = `🔔 *CREDIT REMINDER* 🔔
+
+Dear *${customerName}*,
+
+This is a friendly reminder that you have an outstanding balance of:
+💰 *KSh ${parseFloat(balance || 0).toLocaleString()}*
+
+Please make your payment as soon as possible.
+
+For any inquiries, please contact us.
+
+Thank you for your business! 🙏
+-- 
+Price Point Kenya
+📞 0712345678`;
+    
+    if (confirm(`Send WhatsApp reminder to ${customerName}?`)) {
+        if (openWhatsApp(phone, message)) {
+            showToast(`✅ Opening WhatsApp for ${customerName}`, 'success');
+        }
+    }
+}
+
+function sendWhatsAppCustomMessage(customerId, customerName, phone) {
+    if (!phone || phone === 'None' || phone === '' || phone === 'N/A') {
+        showToast('❌ No phone number available for this customer', 'danger');
+        return;
+    }
+    
+    const message = `Hello *${customerName}*,
+
+I hope this message finds you well.
+
+I wanted to follow up regarding your account with us.
+
+Please feel free to reach out if you have any questions or need assistance.
+
+Best regards,
+Price Point Kenya
+📞 0712345678`;
+    
+    if (confirm(`Send custom message to ${customerName}?`)) {
+        if (openWhatsApp(phone, message)) {
+            showToast(`✅ Opening WhatsApp for ${customerName}`, 'success');
+        }
+    }
+}
+
+// ============================================================
+// BULK WHATSAPP FUNCTIONS
+// ============================================================
+
+function sendBulkWhatsAppReminders() {
+    const rows = document.querySelectorAll('#creditCustomersTableBody .credit-row');
+    let customers = [];
+    
+    rows.forEach(row => {
+        const balance = parseFloat(row.dataset.balance || 0);
+        if (balance > 0) {
+            customers.push({
+                name: row.dataset.name || '',
+                phone: row.dataset.phone || '',
+                balance: balance,
+                customerId: row.dataset.customerId || ''
+            });
+        }
+    });
+    
+    if (customers.length === 0) {
+        showToast('No customers with balance to send reminders', 'warning');
+        return;
+    }
+    
+    let customerList = customers.map((c, i) => 
+        `${i+1}. ${c.name} - KSh ${c.balance.toLocaleString()}`
+    ).join('\n');
+    
+    if (!confirm(`Send WhatsApp reminders to ${customers.length} customers?\n\n${customerList}`)) {
+        return;
+    }
+    
+    let currentIndex = 0;
+    
+    function sendNext() {
+        if (currentIndex >= customers.length) {
+            showToast('✅ All reminders sent!', 'success');
+            return;
+        }
+        
+        const customer = customers[currentIndex];
+        const message = `🔔 *CREDIT REMINDER* 🔔
+
+Dear *${customer.name}*,
+
+This is a friendly reminder that you have an outstanding balance of:
+💰 *KSh ${customer.balance.toLocaleString()}*
+
+Please make your payment as soon as possible.
+
+Thank you for your business! 🙏
+-- 
+Price Point Kenya
+📞 0712345678`;
+        
+        openWhatsApp(customer.phone, message);
+        
+        setTimeout(() => {
+            if (confirm(`✅ Sent to ${customer.name}\n\nSend to next customer?`)) {
+                currentIndex++;
+                sendNext();
+            } else {
+                showToast(`Stopped at ${customer.name}`, 'warning');
+            }
+        }, 3000);
+    }
+    
+    showToast(`📱 Opening WhatsApp for ${customers[0].name}...`, 'info');
+    setTimeout(sendNext, 1500);
+}
+
+function sendWhatsAppToOverdueCustomers() {
+    fetch('/admin/api/credit/overdue')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.overdue && data.overdue.length > 0) {
+                const overdue = data.overdue;
+                let customerList = overdue.map((c, i) => {
+                    const customer = c.customer || c;
+                    const name = customer.full_name || c.full_name || 'Unknown';
+                    const balance = customer.current_balance || c.balance || 0;
+                    const days = c.days_overdue || 0;
+                    return `${i+1}. ${name} - KSh ${balance.toLocaleString()} (${days} days overdue)`;
+                }).join('\n');
+                
+                if (!confirm(`Send reminders to ${overdue.length} overdue customers?\n\n${customerList}`)) {
+                    return;
+                }
+                
+                const first = overdue[0];
+                const customer = first.customer || first;
+                const message = `⚠️ *URGENT: OVERDUE PAYMENT* ⚠️
+
+Dear *${customer.full_name || first.full_name || 'Customer'}*,
+
+Your account is ${first.days_overdue || 0} days overdue.
+
+Outstanding Balance: *KSh ${(customer.current_balance || first.balance || 0).toLocaleString()}*
+
+Please make your payment immediately to avoid any issues.
+
+Thank you for your cooperation.
+-- 
+Price Point Kenya
+📞 0712345678`;
+                
+                openWhatsApp(customer.phone || first.phone || '', message);
+                showToast(`📱 Opening WhatsApp for ${customer.full_name || first.full_name || 'Customer'}`, 'info');
+                
+                setTimeout(() => {
+                    showToast(`⚠️ ${overdue.length - 1} more overdue customers remaining`, 'warning');
+                }, 3000);
+                
+            } else {
+                showToast('✅ No overdue customers', 'success');
+            }
+        })
+        .catch(e => {
+            console.error('Error loading overdue customers:', e);
+            showToast('Error loading overdue customers: ' + e.message, 'danger');
+        });
+}
+
+// ============================================================
+// SHOW CREDIT RECEIPT - FIXED
+// ============================================================
+
+function showCreditReceipt(customerName, total, result) {
+    // Remove any existing modal
+    const existingModal = document.getElementById('creditReceiptModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'creditReceiptModal';
+    modal.innerHTML = `
+        <div class="modal" style="max-width:450px;" onclick="event.stopPropagation()">
+            <button class="close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+            <div class="title">🧾 Credit Purchase Receipt</div>
+            <div style="background:var(--bg-input);padding:16px;border-radius:8px;font-family:'Courier New',monospace;font-size:0.7rem;white-space:pre-wrap;">
+                <div style="text-align:center;font-weight:700;font-size:0.9rem;">PRICEPOINT POS</div>
+                <div style="text-align:center;color:var(--gray-500);">${new Date().toLocaleString()}</div>
+                <hr style="border-color:var(--border-color);margin:8px 0;">
+                <div>👤 Customer: <strong>${customerName}</strong></div>
+                <div>💳 Payment: <strong style="color:#7c3aed;">CREDIT</strong></div>
+                <div>💰 Total: <strong style="color:#7c3aed;">KSh ${total.toLocaleString()}</strong></div>
+                ${result.due_date ? `<div>📅 Due Date: <strong>${result.due_date}</strong></div>` : ''}
+                <hr style="border-color:var(--border-color);margin:8px 0;">
+                <div>📊 New Balance: <strong style="color:#7c3aed;">KSh ${(result.balance_after || 0).toLocaleString()}</strong></div>
+                ${result.transaction_id ? `<div style="font-size:0.6rem;color:var(--gray-400);">📋 TXN: ${result.transaction_id}</div>` : ''}
+                <hr style="border-color:var(--border-color);margin:8px 0;">
+                <div style="text-align:center;color:var(--gray-500);font-size:0.6rem;">✅ Thank you for your business!</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:12px;">
+                <button onclick="printCreditReceipt()" class="btn-primary" style="flex:1;background:linear-gradient(135deg,#7c3aed,#6d28d9);">
+                    🖨️ Print
+                </button>
+                <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline" style="flex:1;">Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// ============================================================
+// PRINT CREDIT RECEIPT - USES USB PRINTER (FIXED)
+// ============================================================
+
+function printCreditReceipt() {
+    const modal = document.getElementById('creditReceiptModal');
+    if (!modal) {
+        showToast('⚠️ No receipt to print', 'warning');
+        return;
+    }
+    
+    let content = modal.querySelector('.modal .bg-input');
+    if (!content) {
+        content = modal.querySelector('.modal > div:not(.title):not(.flex)');
+    }
+    if (!content) {
+        showToast('⚠️ No content found', 'warning');
+        return;
+    }
+    
+    let receiptText = content.textContent || '';
+    receiptText = receiptText.trim();
+    
+    if (!receiptText) {
+        showToast('⚠️ No receipt to print', 'warning');
+        return;
+    }
+    
+    console.log('🖨️ Printing credit receipt...');
+    
+    // ✅ USE GLOBAL USB PRINTER FUNCTION
+    if (typeof window.printToUSBPrinter === 'function') {
+        window.printToUSBPrinter(receiptText);
+    } else {
+        // Fallback to browser print
+        console.log('⚠️ USB printer not available, using browser fallback');
+        const win = window.open('', '_blank', 'width=400,height=600');
+        if (!win) {
+            showToast('⚠️ Allow popups for printing', 'warning');
+            return;
+        }
+        win.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Credit Receipt - PRICEPOINT</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: 'Courier New', monospace; padding: 20px; background: white; color: black; max-width: 80mm; margin: 0 auto; }
+                    pre { font-family: 'Courier New', monospace; font-size: 10pt; white-space: pre-wrap; word-wrap: break-word; margin: 0; line-height: 1.4; }
+                    .receipt-header { text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 8px; }
+                    .receipt-header .store { font-size: 14pt; font-weight: bold; }
+                    .receipt-header .address { font-size: 9pt; color: #666; }
+                    .receipt-footer { text-align: center; border-top: 1px dashed #ccc; padding-top: 8px; margin-top: 8px; font-size: 9pt; color: #666; }
+                    .receipt-line { border-top: 1px dashed #ccc; margin: 6px 0; }
+                    @page { margin: 0; size: 80mm auto; }
+                    @media print { body { padding: 10px; margin: 0; } }
+                </style>
+            </head>
+            <body>
+                <div class="receipt-header">
+                    <div class="store">🏪 PRICEPOINT</div>
+                    <div class="address">📍 Nairobi, Kenya</div>
+                    <div class="address">📞 +254 700 000 000</div>
+                </div>
+                <pre>${receiptText}</pre>
+                <div class="receipt-line"></div>
+                <div class="receipt-footer">
+                    <div>✅ CREDIT PURCHASE</div>
+                    <div style="font-size:8pt;color:#999;">Thank you for your business 😊</div>
+                </div>
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() { window.print(); }, 500);
+                        setTimeout(function() { window.close(); }, 3000);
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        win.document.close();
+    }
+}
+
+// ============================================================
+// LOAD ON PAGE LOAD
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📊 Credit page loaded');
+    loadCreditCustomers();
+    loadMonthlyReport();
+});
+</script>
+
+{% endblock %}

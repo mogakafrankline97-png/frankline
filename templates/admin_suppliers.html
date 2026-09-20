@@ -1,0 +1,788 @@
+{% extends "layout.html" %}
+
+{% block title %}Suppliers · Price Point Kenya{% endblock %}
+
+{% block page_title %}Supplier Management{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     SUPPLIER MANAGEMENT
+     ============================================================ -->
+<div id="suppliers-section" class="section">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+            <h2 class="text-lg font-bold text-[#0f172a]">🏢 Supplier Management</h2>
+            <p class="text-sm text-gray-500">Manage your product suppliers and track stock levels</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="showAddSupplierModal()" class="btn-gradient text-sm py-2 px-4">
+                <i class="fas fa-plus"></i> Add Supplier
+            </button>
+            <button onclick="showLowStockModal()" class="btn-danger text-sm py-2 px-4" id="lowStockBtn">
+                <i class="fas fa-exclamation-triangle"></i> Low Stock (<span id="lowStockBadge">{{ low_stock_count|default(0) }}</span>)
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+        <div class="stat-card p-3">
+            <p class="text-xs text-gray-500">Total Suppliers</p>
+            <p class="text-xl font-bold" id="totalSuppliers">{{ summary.total_suppliers|default(0) }}</p>
+            <p class="text-xs text-gray-400">All suppliers</p>
+        </div>
+        <div class="stat-card p-3">
+            <p class="text-xs text-gray-500">Active Suppliers</p>
+            <p class="text-xl font-bold text-green-600" id="activeSuppliers">{{ summary.active_suppliers|default(0) }}</p>
+            <p class="text-xs text-gray-400">Currently active</p>
+        </div>
+        <div class="stat-card p-3" style="border-left: 4px solid #ef4444;">
+            <p class="text-xs text-gray-500">⚠️ Low Stock Items</p>
+            <p class="text-xl font-bold text-red-600" id="lowStockCount">{{ low_stock_count|default(0) }}</p>
+            <p class="text-xs text-gray-400">Need reordering</p>
+        </div>
+        <div class="stat-card p-3" style="border-left: 4px solid #3b82f6;">
+            <p class="text-xs text-gray-500">Total Products</p>
+            <p class="text-xl font-bold text-blue-600" id="totalProducts">{{ summary.total_products|default(0) }}</p>
+            <p class="text-xs text-gray-400">From all suppliers</p>
+        </div>
+        <div class="stat-card p-3" style="border-left: 4px solid #8b5cf6;">
+            <p class="text-xs text-gray-500">📦 Avg. Products/Supplier</p>
+            <p class="text-xl font-bold text-purple-600" id="avgProducts">
+                {% if summary.total_suppliers|default(0) > 0 %}
+                    {{ (summary.total_products|default(0) / summary.total_suppliers|default(1))|round(1) }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+            <p class="text-xs text-gray-400">Average per supplier</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex flex-wrap gap-2 mb-4">
+        <button onclick="showAddSupplierModal()" class="btn-gradient text-sm py-1.5 px-3">
+            <i class="fas fa-user-plus"></i> New Supplier
+        </button>
+        <button onclick="showLowStockModal()" class="btn-danger text-sm py-1.5 px-3">
+            <i class="fas fa-exclamation-triangle"></i> View Low Stock
+        </button>
+        <button onclick="exportSuppliersCSV()" class="btn-success text-sm py-1.5 px-3">
+            <i class="fas fa-file-export"></i> Export CSV
+        </button>
+        <button onclick="refreshSuppliers()" class="btn-outline text-sm py-1.5 px-3">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-4">
+        <div class="relative flex-1">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="searchSuppliers" placeholder="Search by name, phone, contact, or category..." 
+                   class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition outline-none"
+                   oninput="filterSuppliers(this.value)">
+        </div>
+        <div class="flex gap-2 flex-wrap">
+            <select id="statusFilter" class="form-input py-2 px-3" onchange="filterSuppliers()">
+                <option value="all">All Status</option>
+                <option value="active">✅ Active</option>
+                <option value="inactive">❌ Inactive</option>
+            </select>
+            <select id="categoryFilter" class="form-input py-2 px-3" onchange="filterSuppliers()">
+                <option value="all">All Categories</option>
+                <option value="Electronics">📱 Electronics</option>
+                <option value="Furniture">🪑 Furniture</option>
+                <option value="Accessories">🔌 Accessories</option>
+                <option value="Clothing">👕 Clothing</option>
+                <option value="Food">🍔 Food & Beverages</option>
+                <option value="Hardware">🔧 Hardware</option>
+                <option value="Pharmaceuticals">💊 Pharmaceuticals</option>
+                <option value="Other">📦 Other</option>
+            </select>
+            <button onclick="clearFilters()" class="btn-outline text-sm px-3">
+                <i class="fas fa-times"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Suppliers Table -->
+    <div class="glass-card p-0 overflow-hidden">
+        <div class="table-wrap max-h-[500px] overflow-y-auto">
+            <table>
+                <thead class="sticky top-0 bg-white z-10">
+                    <tr>
+                        <th class="text-sm">Business Name</th>
+                        <th class="text-sm hidden md:table-cell">Contact Person</th>
+                        <th class="text-sm hidden sm:table-cell">Phone</th>
+                        <th class="text-sm hidden lg:table-cell">Category</th>
+                        <th class="text-sm text-center">Products</th>
+                        <th class="text-sm text-center">Status</th>
+                        <th class="text-sm text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="suppliersTableBody">
+                    {% for supplier in suppliers %}
+                    <tr class="supplier-row" 
+                        data-name="{{ supplier.business_name }}" 
+                        data-phone="{{ supplier.phone }}" 
+                        data-status="{{ supplier.status }}"
+                        data-category="{{ supplier.business_category or 'General' }}"
+                        data-contact="{{ supplier.contact_person or '' }}">
+                        <td>
+                            <div>
+                                <p class="font-semibold">{{ supplier.business_name }}</p>
+                                <p class="text-xs text-gray-400 font-mono">{{ supplier.supplier_id }}</p>
+                                {% if supplier.total_products|default(0) > 0 %}
+                                <span class="text-xs text-blue-600">📦 {{ supplier.total_products }} products</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="hidden md:table-cell">{{ supplier.contact_person or 'N/A' }}</td>
+                        <td class="hidden sm:table-cell">
+                            <a href="tel:{{ supplier.phone }}" class="text-blue-600 hover:underline">{{ supplier.phone }}</a>
+                            {% if supplier.whatsapp_number %}
+                            <br><small class="text-green-600"><i class="fab fa-whatsapp"></i> WhatsApp</small>
+                            {% endif %}
+                        </td>
+                        <td class="hidden lg:table-cell">
+                            <span class="badge badge-info text-xs">{{ supplier.business_category or 'General' }}</span>
+                        </td>
+                        <td class="text-center font-bold">
+                            {% if supplier.total_products|default(0) > 0 %}
+                            <span class="text-blue-600">{{ supplier.total_products }}</span>
+                            {% else %}
+                            <span class="text-gray-400">0</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if supplier.status == 'active' %}
+                            <span class="badge badge-success">✅ Active</span>
+                            {% else %}
+                            <span class="badge badge-danger">❌ Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="flex gap-1 justify-center flex-wrap">
+                                <button onclick="editSupplier('{{ supplier.supplier_id }}')" class="btn-outline text-xs px-2 py-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="viewSupplier('{{ supplier.supplier_id }}')" class="btn-outline text-xs px-2 py-1 text-blue-600" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="viewSupplierProducts('{{ supplier.supplier_id }}', '{{ supplier.business_name }}')" class="btn-outline text-xs px-2 py-1 text-purple-600" title="Products">
+                                    <i class="fas fa-boxes"></i>
+                                </button>
+                                <button onclick="deleteSupplier('{{ supplier.supplier_id }}', '{{ supplier.business_name }}')" class="btn-outline text-xs px-2 py-1 text-red-600" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if not suppliers %}
+    <div class="text-center py-10 text-gray-400">
+        <i class="fas fa-store text-4xl block mb-3"></i>
+        <p class="text-lg">No suppliers added yet</p>
+        <p class="text-sm">Click "Add Supplier" to get started</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ============================================================
+     ADD/EDIT SUPPLIER MODAL
+     ============================================================ -->
+<div id="supplierModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 id="modalTitle" class="font-bold text-lg">Add Supplier</h3>
+            <button onclick="closeSupplierModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        
+        <form id="supplierForm" onsubmit="saveSupplier(event)" class="p-4 space-y-4">
+            <input type="hidden" id="editSupplierId">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Business Information -->
+                <div>
+                    <label class="form-label text-sm font-semibold">Business Name *</label>
+                    <input type="text" id="businessName" class="form-input w-full" placeholder="e.g., Tech Distributors Ltd" required>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Registration Number</label>
+                    <input type="text" id="registrationNumber" class="form-input w-full" placeholder="e.g., CPR/2023/12345">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Business Category</label>
+                    <select id="businessCategory" class="form-input w-full">
+                        <option value="">Select Category</option>
+                        <option value="Electronics">📱 Electronics</option>
+                        <option value="Furniture">🪑 Furniture</option>
+                        <option value="Accessories">🔌 Accessories</option>
+                        <option value="Clothing">👕 Clothing</option>
+                        <option value="Food">🍔 Food & Beverages</option>
+                        <option value="Hardware">🔧 Hardware</option>
+                        <option value="Pharmaceuticals">💊 Pharmaceuticals</option>
+                        <option value="Other">📦 Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Payment Terms</label>
+                    <select id="paymentTerms" class="form-input w-full">
+                        <option value="Net 30">Net 30</option>
+                        <option value="Net 45">Net 45</option>
+                        <option value="Net 60">Net 60</option>
+                        <option value="Cash on Delivery">Cash on Delivery</option>
+                        <option value="Prepaid">Prepaid</option>
+                    </select>
+                </div>
+                
+                <!-- Contact Information -->
+                <div>
+                    <label class="form-label text-sm font-semibold">Contact Person *</label>
+                    <input type="text" id="contactPerson" class="form-input w-full" placeholder="e.g., John Mwangi" required>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Phone Number *</label>
+                    <input type="tel" id="phone" class="form-input w-full" placeholder="e.g., 0712345678" required>
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Secondary Phone</label>
+                    <input type="tel" id="phone2" class="form-input w-full" placeholder="e.g., 0723456789">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">WhatsApp Number</label>
+                    <input type="tel" id="whatsappNumber" class="form-input w-full" placeholder="e.g., 0712345678">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Email Address</label>
+                    <input type="email" id="email" class="form-input w-full" placeholder="e.g., info@techdistributors.com">
+                </div>
+                
+                <div>
+                    <label class="form-label text-sm font-semibold">Tax PIN</label>
+                    <input type="text" id="taxPin" class="form-input w-full" placeholder="e.g., P0012345678">
+                </div>
+                
+                <!-- Address -->
+                <div class="md:col-span-2">
+                    <label class="form-label text-sm font-semibold">Physical Address</label>
+                    <textarea id="address" class="form-input w-full" rows="2" placeholder="e.g., Nairobi, CBD, Moi Avenue"></textarea>
+                </div>
+                
+                <!-- Bank Details -->
+                <div class="md:col-span-2">
+                    <label class="form-label text-sm font-semibold">Bank Details</label>
+                    <textarea id="bankDetails" class="form-input w-full" rows="2" placeholder="e.g., Bank: Equity, Account: 1234567890"></textarea>
+                </div>
+                
+                <!-- Notes -->
+                <div class="md:col-span-2">
+                    <label class="form-label text-sm font-semibold">Notes</label>
+                    <textarea id="notes" class="form-input w-full" rows="2" placeholder="Any additional notes about this supplier..."></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 pt-3 border-t">
+                <button type="submit" class="btn-gradient flex-1 py-2">
+                    <i class="fas fa-save"></i> Save Supplier
+                </button>
+                <button type="button" onclick="closeSupplierModal()" class="btn-outline py-2 px-6">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================
+     VIEW SUPPLIER MODAL
+     ============================================================ -->
+<div id="viewSupplierModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 class="font-bold text-lg">Supplier Details</h3>
+            <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="viewSupplierContent" class="p-4">
+            <!-- Content loaded via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     LOW STOCK MODAL
+     ============================================================ -->
+<div id="lowStockModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 class="font-bold text-lg text-red-600">⚠️ Low Stock Items</h3>
+            <button onclick="closeLowStockModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="lowStockContent" class="p-4">
+            <!-- Content loaded via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     SUPPLIER PRODUCTS MODAL
+     ============================================================ -->
+<div id="supplierProductsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
+            <h3 class="font-bold text-lg">📦 Products from <span id="supplierProductsName"></span></h3>
+            <button onclick="closeSupplierProductsModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div id="supplierProductsContent" class="p-4">
+            <!-- Content loaded via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// SUPPLIER CRUD FUNCTIONS
+// ============================================================
+
+function showAddSupplierModal() {
+    document.getElementById('modalTitle').textContent = 'Add Supplier';
+    document.getElementById('supplierForm').reset();
+    document.getElementById('editSupplierId').value = '';
+    document.getElementById('supplierModal').classList.remove('hidden');
+}
+
+function closeSupplierModal() {
+    document.getElementById('supplierModal').classList.add('hidden');
+}
+
+function closeViewModal() {
+    document.getElementById('viewSupplierModal').classList.add('hidden');
+}
+
+function closeLowStockModal() {
+    document.getElementById('lowStockModal').classList.add('hidden');
+}
+
+function closeSupplierProductsModal() {
+    document.getElementById('supplierProductsModal').classList.add('hidden');
+}
+
+function editSupplier(supplierId) {
+    fetch('/admin/api/suppliers/' + supplierId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const s = data.supplier;
+                document.getElementById('modalTitle').textContent = 'Edit Supplier';
+                document.getElementById('editSupplierId').value = supplierId;
+                document.getElementById('businessName').value = s.business_name || '';
+                document.getElementById('registrationNumber').value = s.registration_number || '';
+                document.getElementById('businessCategory').value = s.business_category || '';
+                document.getElementById('paymentTerms').value = s.payment_terms || 'Net 30';
+                document.getElementById('contactPerson').value = s.contact_person || '';
+                document.getElementById('phone').value = s.phone || '';
+                document.getElementById('phone2').value = s.phone2 || '';
+                document.getElementById('whatsappNumber').value = s.whatsapp_number || '';
+                document.getElementById('email').value = s.email || '';
+                document.getElementById('taxPin').value = s.tax_pin || '';
+                document.getElementById('address').value = s.address || '';
+                document.getElementById('bankDetails').value = s.bank_details || '';
+                document.getElementById('notes').value = s.notes || '';
+                document.getElementById('supplierModal').classList.remove('hidden');
+            }
+        })
+        .catch(e => {
+            showToast('Error loading supplier', 'danger');
+        });
+}
+
+function viewSupplier(supplierId) {
+    fetch('/admin/api/suppliers/' + supplierId)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const s = data.supplier;
+                const statusIcon = s.status === 'active' ? '✅' : '❌';
+                const statusColor = s.status === 'active' ? 'text-green-600' : 'text-red-600';
+                
+                const content = `
+                    <div class="space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="text-xl font-bold">${s.business_name}</h4>
+                                <p class="text-gray-400 font-mono text-sm">${s.supplier_id}</p>
+                            </div>
+                            <span class="badge ${s.status === 'active' ? 'badge-success' : 'badge-danger'}">${statusIcon} ${s.status}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-400">Contact Person</p>
+                                <p class="font-semibold">${s.contact_person || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Phone</p>
+                                <p class="font-semibold"><a href="tel:${s.phone}" class="text-blue-600">${s.phone}</a></p>
+                                ${s.whatsapp_number ? `<p class="text-sm text-green-600"><i class="fab fa-whatsapp"></i> ${s.whatsapp_number}</p>` : ''}
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Email</p>
+                                <p class="font-semibold">${s.email || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Category</p>
+                                <p class="font-semibold">${s.business_category || 'General'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Payment Terms</p>
+                                <p class="font-semibold">${s.payment_terms || 'Net 30'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Products Supplied</p>
+                                <p class="font-semibold text-blue-600">${s.total_products || 0}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Registration Number</p>
+                                <p class="font-semibold">${s.registration_number || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Tax PIN</p>
+                                <p class="font-semibold">${s.tax_pin || 'N/A'}</p>
+                            </div>
+                        </div>
+                        
+                        ${s.address ? `<div><p class="text-xs text-gray-400">📍 Address</p><p>${s.address}</p></div>` : ''}
+                        ${s.bank_details ? `<div><p class="text-xs text-gray-400">🏦 Bank Details</p><p class="text-sm">${s.bank_details}</p></div>` : ''}
+                        ${s.notes ? `<div><p class="text-xs text-gray-400">📝 Notes</p><p class="text-sm">${s.notes}</p></div>` : ''}
+                        
+                        <div class="flex gap-2 pt-3 border-t flex-wrap">
+                            <button onclick="editSupplier('${s.supplier_id}'); closeViewModal();" class="btn-gradient text-sm py-2 px-4">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="viewSupplierProducts('${s.supplier_id}', '${s.business_name}'); closeViewModal();" class="btn-outline text-sm py-2 px-4 text-purple-600">
+                                <i class="fas fa-boxes"></i> View Products
+                            </button>
+                            <button onclick="closeViewModal()" class="btn-outline text-sm py-2 px-4">Close</button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('viewSupplierContent').innerHTML = content;
+                document.getElementById('viewSupplierModal').classList.remove('hidden');
+            }
+        })
+        .catch(e => {
+            showToast('Error loading supplier', 'danger');
+        });
+}
+
+function viewSupplierProducts(supplierId, supplierName) {
+    document.getElementById('supplierProductsName').textContent = supplierName;
+    
+    // Fetch products for this supplier
+    fetch('/admin/api/products?supplier_id=' + supplierId)
+        .then(r => r.json())
+        .then(data => {
+            let html = `
+                <div class="space-y-3">
+                    <p class="text-sm text-gray-500">Showing products supplied by ${supplierName}</p>
+                    <div class="table-wrap max-h-96 overflow-y-auto">
+                        <table>
+                            <thead class="sticky top-0 bg-white">
+                                <tr>
+                                    <th class="text-xs">Product</th>
+                                    <th class="text-xs text-right">Price</th>
+                                    <th class="text-xs text-center">Stock</th>
+                                    <th class="text-xs text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            if (data.products && data.products.length > 0) {
+                data.products.forEach(p => {
+                    const stock = p.stock || 0;
+                    const stockClass = stock < 10 ? 'text-red-600 font-bold' : stock < 20 ? 'text-amber-600' : 'text-green-600';
+                    const statusBadge = stock < 10 ? 'badge-danger' : stock < 20 ? 'badge-warning' : 'badge-success';
+                    const statusText = stock < 10 ? '⚠️ Low Stock' : stock < 20 ? '⚠️ Running Low' : '✅ In Stock';
+                    
+                    html += `
+                        <tr>
+                            <td class="text-xs font-semibold">${p.name}</td>
+                            <td class="text-xs text-right">KSh ${(p.price || 0).toLocaleString()}</td>
+                            <td class="text-xs text-center ${stockClass}">${stock}</td>
+                            <td class="text-xs text-center"><span class="badge ${statusBadge} text-xs">${statusText}</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                html += `<tr><td colspan="4" class="text-center py-6 text-gray-400">No products found for this supplier</td></tr>`;
+            }
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('supplierProductsContent').innerHTML = html;
+            document.getElementById('supplierProductsModal').classList.remove('hidden');
+        })
+        .catch(e => {
+            showToast('Error loading products', 'danger');
+        });
+}
+
+function deleteSupplier(supplierId, name) {
+    if (!confirm(`⚠️ Are you sure you want to delete "${name}"?`)) return;
+    
+    fetch('/admin/api/suppliers/' + supplierId, {
+        method: 'DELETE'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Supplier deleted successfully', 'success');
+            refreshSuppliers();
+        } else {
+            showToast('Error: ' + data.message, 'danger');
+        }
+    })
+    .catch(e => {
+        showToast('Error deleting supplier', 'danger');
+    });
+}
+
+function saveSupplier(event) {
+    event.preventDefault();
+    
+    const editId = document.getElementById('editSupplierId').value;
+    const url = editId ? '/admin/api/suppliers/' + editId : '/admin/api/suppliers';
+    const method = editId ? 'PUT' : 'POST';
+    
+    const data = {
+        business_name: document.getElementById('businessName').value.trim(),
+        registration_number: document.getElementById('registrationNumber').value.trim(),
+        business_category: document.getElementById('businessCategory').value,
+        payment_terms: document.getElementById('paymentTerms').value,
+        contact_person: document.getElementById('contactPerson').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        phone2: document.getElementById('phone2').value.trim(),
+        whatsapp_number: document.getElementById('whatsappNumber').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        tax_pin: document.getElementById('taxPin').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        bank_details: document.getElementById('bankDetails').value.trim(),
+        notes: document.getElementById('notes').value.trim()
+    };
+    
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast(editId ? 'Supplier updated successfully' : 'Supplier added successfully', 'success');
+            closeSupplierModal();
+            refreshSuppliers();
+        } else {
+            showToast('Error: ' + data.message, 'danger');
+        }
+    })
+    .catch(e => {
+        showToast('Error saving supplier', 'danger');
+    });
+}
+
+function showLowStockModal() {
+    fetch('/admin/api/suppliers/low-stock')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const lowStock = data.low_stock || [];
+                let html = `
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-500">${lowStock.length} items need reordering</p>
+                        <div class="table-wrap max-h-96 overflow-y-auto">
+                            <table>
+                                <thead class="sticky top-0 bg-white">
+                                    <tr>
+                                        <th class="text-xs">Product</th>
+                                        <th class="text-xs">Supplier</th>
+                                        <th class="text-xs text-center">Stock</th>
+                                        <th class="text-xs text-right">Price</th>
+                                        <th class="text-xs text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                if (lowStock.length === 0) {
+                    html += `<tr><td colspan="5" class="text-center py-6 text-green-600">✅ All products are well stocked!</td></tr>`;
+                } else {
+                    lowStock.forEach(item => {
+                        const stock = item.stock || 0;
+                        const severity = stock === 0 ? 'text-red-600 font-bold' : 'text-amber-600 font-bold';
+                        html += `
+                            <tr>
+                                <td class="text-xs font-semibold">${item.name}</td>
+                                <td class="text-xs">${item.supplier_name || 'N/A'}</td>
+                                <td class="text-xs text-center ${severity}">${stock}</td>
+                                <td class="text-xs text-right">KSh ${(item.price || 0).toLocaleString()}</td>
+                                <td class="text-xs text-center">
+                                    <button onclick="editProduct('${item.id}')" class="btn-gradient text-xs px-2 py-1">
+                                        <i class="fas fa-edit"></i> Restock
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('lowStockContent').innerHTML = html;
+                document.getElementById('lowStockModal').classList.remove('hidden');
+            }
+        })
+        .catch(e => {
+            showToast('Error loading low stock items', 'danger');
+        });
+}
+
+function filterSuppliers() {
+    const search = document.getElementById('searchSuppliers')?.value?.toLowerCase() || '';
+    const status = document.getElementById('statusFilter')?.value || 'all';
+    const category = document.getElementById('categoryFilter')?.value || 'all';
+    const rows = document.querySelectorAll('#suppliersTableBody .supplier-row');
+    
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const name = (row.dataset.name || '').toLowerCase();
+        const phone = (row.dataset.phone || '').toLowerCase();
+        const contact = (row.dataset.contact || '').toLowerCase();
+        const rowCategory = row.dataset.category || 'General';
+        const rowStatus = row.dataset.status || 'active';
+        
+        const matchSearch = !search || name.includes(search) || phone.includes(search) || contact.includes(search);
+        const matchStatus = status === 'all' || rowStatus === status;
+        const matchCategory = category === 'all' || rowCategory === category;
+        
+        const show = matchSearch && matchStatus && matchCategory;
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    // Show/hide no results message
+    let noResults = document.getElementById('noResultsMessage');
+    if (!noResults) {
+        noResults = document.createElement('div');
+        noResults.id = 'noResultsMessage';
+        noResults.className = 'text-center py-6 text-gray-400';
+        noResults.innerHTML = '<i class="fas fa-search text-2xl block mb-2"></i><p>No suppliers match your filters</p>';
+        document.querySelector('#suppliersTableBody').parentNode.appendChild(noResults);
+    }
+    
+    if (visibleCount === 0 && rows.length > 0) {
+        noResults.style.display = 'block';
+    } else {
+        noResults.style.display = 'none';
+    }
+}
+
+function clearFilters() {
+    document.getElementById('searchSuppliers').value = '';
+    document.getElementById('statusFilter').value = 'all';
+    document.getElementById('categoryFilter').value = 'all';
+    filterSuppliers();
+}
+
+function refreshSuppliers() {
+    location.reload();
+}
+
+function exportSuppliersCSV() {
+    fetch('/admin/api/suppliers')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.suppliers) {
+                let csv = 'Business Name,Contact Person,Phone,Email,Category,Status,Products\n';
+                data.suppliers.forEach(s => {
+                    csv += `"${s.business_name}","${s.contact_person || ''}","${s.phone}","${s.email || ''}","${s.business_category || 'General'}","${s.status}",${s.total_products || 0}\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `suppliers_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showToast('Export successful!', 'success');
+            }
+        })
+        .catch(e => {
+            showToast('Error exporting suppliers', 'danger');
+        });
+}
+
+// ============================================================
+// TOAST NOTIFICATIONS
+// ============================================================
+function showToast(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-500',
+        danger: 'bg-red-500',
+        warning: 'bg-amber-500',
+        info: 'bg-blue-500'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 z-50 ${colors[type] || 'bg-gray-800'} text-white px-4 py-3 rounded-xl shadow-lg text-sm max-w-md transform transition-all duration-300 translate-y-full opacity-0`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    });
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(100%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+function editProduct(productId) {
+    // Navigate to products page with edit
+    window.location.href = '/admin?edit_product=' + productId;
+}
+</script>
+
+{% endblock %}

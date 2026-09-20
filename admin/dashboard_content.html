@@ -1,0 +1,516 @@
+{% extends "admin_layout.html" %}
+
+{% block title %}Dashboard · Price Point Kenya{% endblock %}
+
+{% block content %}
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard-section" class="section">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#0f172a] tracking-tight">Dashboard</h2>
+            <p class="text-gray-400 text-sm mt-0.5">Welcome back, Admin! Here's your store overview</p>
+        </div>
+        <div class="flex gap-2">
+            <button class="btn-gradient" onclick="showSection('add-product')">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+        </div>
+    </div>
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="stat-card animate-slide" style="animation-delay: 0.05s;">
+            <div class="flex items-center justify-between mb-3">
+                <div class="stat-icon bg-blue-50 text-blue-600"><i class="fas fa-box"></i></div>
+                <span class="text-2xl font-black text-[#0f172a]">{{ stats.total_products if stats else 0 }}</span>
+            </div>
+            <p class="stat-label">Total Products</p>
+        </div>
+        <div class="stat-card animate-slide" style="animation-delay: 0.1s;">
+            <div class="flex items-center justify-between mb-3">
+                <div class="stat-icon bg-purple-50 text-purple-600"><i class="fas fa-gift"></i></div>
+                <span class="text-2xl font-black text-[#0f172a]">{{ stats.total_bundles if stats else 0 }}</span>
+            </div>
+            <p class="stat-label">Bundles</p>
+        </div>
+        <div class="stat-card animate-slide" style="animation-delay: 0.15s;">
+            <div class="flex items-center justify-between mb-3">
+                <div class="stat-icon bg-yellow-50 text-yellow-600"><i class="fas fa-shopping-bag"></i></div>
+                <span class="text-2xl font-black text-[#0f172a]">{{ stats.total_orders if stats else 0 }}</span>
+            </div>
+            <p class="stat-label">Total Orders</p>
+            <span class="stat-change mt-2 inline-block">{{ stats.pending_orders if stats else 0 }} pending</span>
+        </div>
+        <div class="stat-card animate-slide" style="animation-delay: 0.2s;">
+            <div class="flex items-center justify-between mb-3">
+                <div class="stat-icon bg-red-50 text-red-600"><i class="fas fa-exclamation-triangle"></i></div>
+                <span class="text-2xl font-black text-[#0f172a]">{{ stats.low_stock if stats else 0 }}</span>
+            </div>
+            <p class="stat-label">Low Stock Items</p>
+        </div>
+        <div class="stat-card animate-slide" style="animation-delay: 0.25s;">
+            <div class="flex items-center justify-between mb-3">
+                <div class="stat-icon bg-green-50 text-green-600"><i class="fas fa-coin"></i></div>
+                <span class="text-2xl font-black text-[#0f172a]" id="dashRevenue">KSh 0</span>
+            </div>
+            <p class="stat-label">Total Revenue</p>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="glass-card animate-fade">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-[#0f172a] text-lg"><i class="fas fa-clock text-blue-500 mr-2"></i>Recent Activity</h3>
+            <span class="text-xs text-gray-400">Last 3 orders</span>
+        </div>
+        <div class="space-y-3">
+            {% if orders and orders|length > 0 %}
+                {% for order in orders[:3] %}
+                <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-all border border-transparent hover:border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                            <i class="fas fa-receipt text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-[#0f172a]">#{{ order.order_id or order.id }}</p>
+                            <p class="text-xs text-gray-400">{{ order.customer.name if order.customer and order.customer.name else 'Customer' }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-semibold text-sm">KSh {{ "%.0f"|format(order.total or 0) }}</span>
+                        <span class="badge {% if order.status == 'pending' %}badge-warning{% elif order.status == 'confirmed' %}badge-info{% elif order.status == 'shipped' %}badge-purple{% elif order.status == 'delivered' %}badge-success{% else %}badge-warning{% endif %}">
+                            {{ order.status or 'Pending' }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-inbox text-3xl block mb-2"></i>
+                    <p>No orders yet. Your store is ready to sell!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ===== ANALYTICS ===== -->
+<div id="analytics-section" class="section hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#0f172a] tracking-tight">Revenue Analytics</h2>
+            <p class="text-gray-400 text-sm mt-0.5">Track your sales performance and profitability</p>
+        </div>
+        <button class="btn-outline" onclick="loadAnalytics()"><i class="fas fa-sync-alt"></i> Refresh</button>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="stat-card" style="border-left: 4px solid #22c55e;">
+            <p class="stat-label">Revenue</p>
+            <p class="stat-value text-green-600" id="totalRevenue">KSh 0</p>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+            <p class="stat-label">Cost</p>
+            <p class="stat-value text-blue-600" id="totalCost">KSh 0</p>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
+            <p class="stat-label">Profit</p>
+            <p class="stat-value text-purple-600" id="totalProfit">KSh 0</p>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+            <p class="stat-label">Orders</p>
+            <p class="stat-value text-yellow-600" id="totalOrders">0</p>
+        </div>
+    </div>
+
+    <div class="glass-card mb-6 animate-fade">
+        <h3 class="font-bold text-[#0f172a] text-lg mb-4"><i class="fas fa-chart-line text-blue-500 mr-2"></i>Profit Overview</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-2xl border border-green-200/50">
+                <p class="text-sm text-gray-500 font-medium">Revenue</p>
+                <p class="text-2xl font-extrabold text-green-600" id="revRevenue">KSh 0</p>
+                <p class="text-xs text-gray-400 mt-1">Total sales amount</p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-50 to-violet-50 p-5 rounded-2xl border border-purple-200/50">
+                <p class="text-sm text-gray-500 font-medium">Profit</p>
+                <p class="text-2xl font-extrabold text-purple-600" id="revProfit">KSh 0</p>
+                <p class="text-xs text-gray-400 mt-1">Revenue - Cost</p>
+            </div>
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-5 rounded-2xl border border-blue-200/50">
+                <p class="text-sm text-gray-500 font-medium">Profit Margin</p>
+                <p class="text-2xl font-extrabold text-blue-600" id="profitMargin">0%</p>
+                <p class="text-xs text-gray-400 mt-1">(Profit ÷ Revenue) × 100</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-card mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-[#0f172a] text-lg"><i class="fas fa-calendar-alt text-blue-500 mr-2"></i>Monthly Performance</h3>
+            <span class="text-xs text-gray-400">Revenue breakdown by month</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Month</th><th class="text-right">Orders</th><th class="text-right">Items</th><th class="text-right">Revenue</th><th class="text-right">Cost</th><th class="text-right">Profit</th><th class="text-right">Margin</th></tr>
+                </thead>
+                <tbody id="monthlyTable"><tr><td colspan="7" class="text-center py-8 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-[#0f172a] text-lg"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Top Selling Products</h3>
+            <span class="text-xs text-gray-400">By profit generated</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Product</th><th class="text-right">Qty</th><th class="text-right">Revenue</th><th class="text-right">Cost</th><th class="text-right">Profit</th><th class="text-right">Margin</th></tr>
+                </thead>
+                <tbody id="productTable"><tr><td colspan="6" class="text-center py-8 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PRODUCTS ===== -->
+<div id="products-section" class="section hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#0f172a] tracking-tight">Products</h2>
+            <p class="text-gray-400 text-sm mt-0.5">Manage your product inventory</p>
+        </div>
+        <button onclick="showSection('add-product')" class="btn-gradient"><i class="fas fa-plus"></i> Add Product</button>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Product</th><th>Category</th><th class="text-right">Selling</th><th class="text-right">Cost</th><th class="text-right">Profit</th><th class="text-center">Stock</th><th class="text-center">Status</th><th class="text-center">Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
+                                <img src="{{ product.image }}" alt="{{ product.name }}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<i class=\'fas fa-box text-gray-300 text-xl\'></i>'">
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-[#0f172a]">{{ product.name }}</p>
+                                <p class="text-xs text-gray-400 font-mono">{{ product.id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-info">{{ product.category or 'Uncategorized' }}</span></td>
+                    <td class="text-right font-semibold">KSh {{ "%.0f"|format(product.price) }}</td>
+                    <td class="text-right text-gray-500">KSh {{ "%.0f"|format(product.cost_price or 0) }}</td>
+                    <td class="text-right {% if (product.price - (product.cost_price or 0)) > 0 %}text-green-600{% else %}text-red-600{% endif %} font-bold">
+                        KSh {{ "%.0f"|format((product.price - (product.cost_price or 0))|abs) }}
+                    </td>
+                    <td class="text-center">
+                        {% if product.stock < 10 %}<span class="badge badge-danger">{{ product.stock }}</span>
+                        {% elif product.stock < 30 %}<span class="badge badge-warning">{{ product.stock }}</span>
+                        {% else %}<span class="badge badge-success">{{ product.stock }}</span>{% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if product.badge %}<span class="badge badge-purple">{{ product.badge }}</span>{% else %}<span class="badge badge-success">In Stock</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="flex gap-1 justify-center">
+                            <button class="btn-outline text-xs px-2.5 py-1.5" onclick="editProduct('{{ product.id }}')" title="Edit"><i class="fas fa-pen text-xs"></i></button>
+                            <button class="btn-danger text-xs px-2.5 py-1.5" onclick="deleteProduct('{{ product.id }}')" title="Delete"><i class="fas fa-trash text-xs"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== ADD PRODUCT ===== -->
+<div id="add-product-section" class="section hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#0f172a] tracking-tight">Add New Product</h2>
+            <p class="text-gray-400 text-sm mt-0.5">Fill in the details to add a new product</p>
+        </div>
+    </div>
+    <div class="glass-card">
+        <form id="productForm" onsubmit="saveProduct(event)">
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label"><i class="fas fa-tag"></i> Product ID</label>
+                    <input type="text" id="prodId" class="form-input" placeholder="e.g. iphone_15_pro" required>
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-heading"></i> Product Name</label>
+                    <input type="text" id="prodName" class="form-input" placeholder="e.g. iPhone 15 Pro Max" required>
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-folder"></i> Category</label>
+                    <select id="prodCategory" class="form-input" required>
+                        <option value="">Select Category</option>
+                        <option value="Phones">📱 Phones</option>
+                        <option value="Laptops">💻 Laptops</option>
+                        <option value="Accessories">🎧 Accessories</option>
+                        <option value="Wearables">⌚ Wearables</option>
+                        <option value="Audio">🎵 Audio</option>
+                        <option value="Televisions">📺 Televisions</option>
+                        <option value="Gaming">🎮 Gaming</option>
+                        <option value="Tablets">📱 Tablets</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-coin"></i> Selling Price (KES)</label>
+                    <input type="number" id="prodPrice" class="form-input" placeholder="e.g. 245000" required>
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-shopping-cart"></i> Cost Price (KES)</label>
+                    <input type="number" id="prodCost" class="form-input" placeholder="e.g. 200000" required>
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-tag"></i> Original Price (KES)</label>
+                    <input type="number" id="prodOriginal" class="form-input" placeholder="e.g. 265000">
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-boxes"></i> Stock</label>
+                    <input type="number" id="prodStock" class="form-input" placeholder="e.g. 25" required>
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-star"></i> Rating</label>
+                    <input type="number" id="prodRating" class="form-input" placeholder="e.g. 4.5" step="0.1" value="4.5">
+                </div>
+                <div>
+                    <label class="form-label"><i class="fas fa-medal"></i> Badge</label>
+                    <select id="prodBadge" class="form-input">
+                        <option value="">None</option>
+                        <option value="Best Seller">⭐ Best Seller</option>
+                        <option value="New">🌟 New</option>
+                        <option value="Trending">🔥 Trending</option>
+                        <option value="Editor's Pick">✏️ Editor's Pick</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="form-label"><i class="fas fa-image"></i> Product Image</label>
+                    <div class="flex gap-2 mb-3">
+                        <button type="button" class="btn-outline text-xs active" onclick="switchImageMethod('url')" id="urlTab"><i class="fas fa-link"></i> URL</button>
+                        <button type="button" class="btn-outline text-xs" onclick="switchImageMethod('upload')" id="uploadTab"><i class="fas fa-upload"></i> Upload</button>
+                    </div>
+                    <div id="urlMethod" class="image-input-group">
+                        <input type="url" id="prodImage" class="form-input" placeholder="https://images.unsplash.com/photo-..." />
+                    </div>
+                    <div id="uploadMethod" class="upload-area" style="display: none;" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(this)" />
+                        <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <p class="font-medium text-gray-600">Click to upload or drag and drop</p>
+                        <span class="sub-text text-xs text-gray-400">PNG, JPG, JPEG, GIF, WEBP (Max 5MB)</span>
+                    </div>
+                    <img id="imagePreview" class="upload-preview" alt="Preview" />
+                </div>
+                <div class="md:col-span-2">
+                    <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="prodDesc" class="form-input" rows="3" placeholder="Product description..." required></textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="form-label"><i class="fas fa-list"></i> Specifications (comma separated)</label>
+                    <input type="text" id="prodSpecs" class="form-input" placeholder="e.g. 256GB Storage, 8GB RAM, 48MP Camera">
+                </div>
+            </div>
+            <div class="flex gap-4 mt-6 pt-4 border-t border-gray-100">
+                <button type="submit" class="btn-gradient" id="saveBtn"><i class="fas fa-save"></i> Save Product</button>
+                <button type="button" onclick="showSection('products')" class="btn-outline"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== ORDERS ===== -->
+<div id="orders-section" class="section hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#0f172a] tracking-tight">Orders</h2>
+            <p class="text-gray-400 text-sm mt-0.5">Manage and track customer orders</p>
+        </div>
+        <span class="text-sm text-gray-400 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">{{ orders|length if orders else 0 }} total orders</span>
+    </div>
+    <div class="glass-card p-0 overflow-hidden">
+        {% if orders and orders|length > 0 %}
+        <div class="table-wrap border-0 rounded-none">
+            <table>
+                <thead><tr><th>Order ID</th><th>Customer</th><th class="text-right">Total</th><th class="text-center">Status</th><th>Date</th><th class="text-center">Actions</th></tr></thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td class="font-bold text-[#0f172a] font-mono text-sm">{{ order.order_id or order.id }}</td>
+                        <td>
+                            <div>
+                                <p class="text-sm font-medium text-[#0f172a]">{{ order.customer.name if order.customer and order.customer.name else 'Customer' }}</p>
+                                <p class="text-xs text-gray-400">{{ order.customer.email if order.customer and order.customer.email else '' }}</p>
+                            </div>
+                        </td>
+                        <td class="text-right font-bold">KSh {{ "%.0f"|format(order.total or 0) }}</td>
+                        <td class="text-center">
+                            <select onchange="updateOrderStatus('{{ order.order_id }}', this.value)" 
+                                    class="text-xs font-bold border rounded-lg px-3 py-1.5 outline-none transition-all {% if order.status == 'pending' %}border-yellow-300 text-yellow-700 bg-yellow-50{% elif order.status == 'confirmed' %}border-blue-300 text-blue-700 bg-blue-50{% elif order.status == 'shipped' %}border-purple-300 text-purple-700 bg-purple-50{% elif order.status == 'delivered' %}border-green-300 text-green-700 bg-green-50{% endif %}">
+                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>⏳ Pending</option>
+                                <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>✅ Confirmed</option>
+                                <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>📦 Shipped</option>
+                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>🎯 Delivered</option>
+                            </select>
+                        </td>
+                        <td class="text-sm text-gray-400">{{ order.created_at[:10] if order.created_at else '' }}</td>
+                        <td class="text-center">
+                            <button onclick="viewOrder('{{ order.order_id }}')" class="text-blue-500 hover:text-blue-700 transition text-sm px-3 py-1.5 rounded-lg hover:bg-blue-50" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <div class="text-5xl mb-4">📦</div>
+            <p class="text-gray-400 text-lg">No orders yet</p>
+            <p class="text-gray-300 text-sm mt-1">Orders will appear here once customers make purchases</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===== CUSTOMERS ===== -->
+<div id="customers-section" class="section hidden">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-3xl font-extrabold text-[#0f172a] tracking-tight">Customers</h2>
+            <p class="text-gray-400 text-sm mt-0.5">View your customer base</p>
+        </div>
+    </div>
+    <div class="glass-card p-0 overflow-hidden">
+        {% set customer_list = {} %}
+        {% for order in orders %}
+            {% if order.customer and order.customer.name %}
+                {% set name = order.customer.name %}
+                {% if name not in customer_list %}
+                    {% set _ = customer_list.update({name: {'email': order.customer.email, 'phone': order.customer.phone, 'orders': 0}}) %}
+                {% endif %}
+                {% set _ = customer_list[name].update({'orders': customer_list[name].orders + 1}) %}
+            {% endif %}
+        {% endfor %}
+        {% if customer_list|length > 0 %}
+        <div class="table-wrap border-0 rounded-none">
+            <table>
+                <thead><tr><th>Customer Name</th><th>Email</th><th>Phone</th><th class="text-center">Orders</th></tr></thead>
+                <tbody>
+                    {% for name, info in customer_list.items() %}
+                    <tr>
+                        <td class="font-semibold text-[#0f172a]">{{ name }}</td>
+                        <td class="text-gray-600">{{ info.email or 'N/A' }}</td>
+                        <td class="text-gray-600">{{ info.phone or 'N/A' }}</td>
+                        <td class="text-center"><span class="badge badge-info">{{ info.orders }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <div class="text-5xl mb-4">👤</div>
+            <p class="text-gray-400 text-lg">No customer data yet</p>
+            <p class="text-gray-300 text-sm mt-1">Customers will appear here once orders are placed</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ===== IMAGE UPLOAD SCRIPTS ===== -->
+<script>
+    // Image Upload Methods
+    let currentImageMethod = 'url';
+
+    function switchImageMethod(method) {
+        currentImageMethod = method;
+        const urlMethod = document.getElementById('urlMethod');
+        const uploadMethod = document.getElementById('uploadMethod');
+        const urlTab = document.getElementById('urlTab');
+        const uploadTab = document.getElementById('uploadTab');
+        
+        if (method === 'url') {
+            urlMethod.style.display = 'flex';
+            uploadMethod.style.display = 'none';
+            urlTab.classList.add('active');
+            uploadTab.classList.remove('active');
+        } else {
+            urlMethod.style.display = 'none';
+            uploadMethod.style.display = 'block';
+            uploadTab.classList.add('active');
+            urlTab.classList.remove('active');
+        }
+    }
+
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch('/admin/upload-image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('prodImage').value = data.url;
+                showPreview(data.url);
+                showToast('✅ Image uploaded successfully!');
+            } else {
+                showToast('❌ ' + data.message);
+            }
+        })
+        .catch(err => showToast('❌ Upload failed: ' + err.message));
+    }
+
+    function showPreview(url) {
+        const preview = document.getElementById('imagePreview');
+        preview.src = url;
+        preview.classList.add('visible');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadMethod');
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    handleFileUpload(document.getElementById('fileInput'));
+                }
+            });
+        }
+        const urlInput = document.getElementById('prodImage');
+        if (urlInput) {
+            urlInput.addEventListener('input', function() {
+                if (this.value) showPreview(this.value);
+            });
+        }
+    });
+</script>
+
+{% endblock %}

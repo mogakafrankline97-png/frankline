@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        .container { text-align: center; max-width: 400px; }
+        .icon { font-size: 80px; color: #f59e0b; margin-bottom: 20px; }
+        h1 { font-size: 2rem; margin-bottom: 10px; }
+        p { color: #94a3b8; margin-bottom: 20px; line-height: 1.6; }
+        .btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(5,150,105,0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔍</div>
+        <h1>404 - Page Not Found</h1>
+        <p>The page you're looking for doesn't exist.</p>
+        <a href="/admin/pos" class="btn">Go to POS</a>
+    </div>
+</body>
+</html>

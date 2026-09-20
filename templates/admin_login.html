@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>PricePoint · Login</title>
+    <style>
+        /* ============================================================
+           COMPLETE OFFLINE LOGIN - NO CDN DEPENDENCIES
+           ============================================================ */
+        * { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body { 
+            background: #f0f4f8; 
+            min-height: 100vh; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* ===== GLASS CARD ===== */
+        .glass-card { 
+            background: rgba(255,255,255,0.75); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255,255,255,0.5); 
+            border-radius: 28px;
+            padding: 44px 48px;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.04);
+            animation: fadeIn 0.6s ease-out;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .deco-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            border-radius: 0 0 100% 100%;
+            opacity: 0.3;
+        }
+
+        /* ===== LOGO ===== */
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.15);
+        }
+        .logo-icon .bolt { font-weight: 900; }
+
+        .brand-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+        .brand-text span {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .brand-sub {
+            color: #94a3b8;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        /* ===== FORM ===== */
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-input {
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 14px;
+            padding: 13px 18px;
+            width: 100%;
+            color: #0f172a;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+        .form-input::placeholder { color: #94a3b8; }
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.04);
+            background: white;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border: none;
+            cursor: pointer;
+            padding: 13px 24px;
+            border-radius: 14px;
+            color: white;
+            font-weight: 600;
+            width: 100%;
+            font-size: 16px;
+            box-shadow: 0 4px 16px rgba(37,99,235,0.15);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 32px rgba(37,99,235,0.25); 
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-primary .spinner {
+            display: inline-block;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== CHECKBOX ===== */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .checkbox-group input[type="checkbox"] {
+            accent-color: #2563eb;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+        .forgot-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 11px;
+        }
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.4s ease;
+        }
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .alert-danger {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .alert-success {
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        .alert-info {
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+
+        /* ===== ROLE BADGES ===== */
+        .quick-login-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.06);
+            user-select: none;
+            text-align: center;
+            background: rgba(0,0,0,0.03);
+            color: #475569;
+        }
+        .role-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            background: rgba(37,99,235,0.04);
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+        .role-badge:active { transform: scale(0.95); }
+        .role-badge.admin:hover { background: rgba(37,99,235,0.06); border-color: #2563eb; color: #2563eb; }
+        .role-badge.manager:hover { background: rgba(124,58,237,0.06); border-color: #7c3aed; color: #7c3aed; }
+        .role-badge.pos:hover { background: rgba(245,158,11,0.06); border-color: #f59e0b; color: #d97706; }
+        .role-badge.user:hover { background: rgba(16,185,129,0.06); border-color: #10b981; color: #059669; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 16px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        .footer-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-link:hover { color: #475569; }
+        .footer-divider { color: #e2e8f0; }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 20px 0 16px;
+        }
+        .divider-label {
+            color: #94a3b8;
+            font-size: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .glass-card { padding: 28px 20px; border-radius: 20px; max-width: 100%; }
+            .quick-login-grid { grid-template-columns: 1fr 1fr; }
+            .role-badge { font-size: 9px; padding: 5px 12px; }
+            .form-input { font-size: 14px; padding: 11px 14px; }
+            .brand-text { font-size: 20px; }
+            .logo-icon { width: 56px; height: 56px; font-size: 24px; }
+        }
+        @media (max-width: 380px) {
+            .glass-card { padding: 20px 16px; }
+            .quick-login-grid { gap: 4px; }
+            .role-badge { font-size: 8px; padding: 4px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card">
+        <div class="deco-line"></div>
+
+        <!-- Logo -->
+        <div class="logo-icon">
+            <span class="bolt">⚡</span>
+        </div>
+        <div class="brand-text">Acacia<span>Mart</span></div>
+        <div class="brand-sub">Sign in to your account</div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="margin-top:16px;">
+                        <span>{% if category == 'danger' %}⚠️{% elif category == 'success' %}✅{% else %}ℹ️{% endif %}</span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('admin.user_login') }}" id="loginForm" style="margin-top:20px;">
+            <div class="form-group">
+                <label class="form-label">📧 Email Address</label>
+                <input type="email" name="email" id="loginEmail" class="form-input" placeholder="Enter your email" required autofocus value="admin@pricepoint.com" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">🔒 Password</label>
+                <input type="password" name="password" id="loginPassword" class="form-input" placeholder="Enter your password" required value="electronics2026" />
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" checked /> Remember me
+                </label>
+                <a href="#" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">
+                → Sign In
+            </button>
+        </form>
+
+        <!-- Quick Login -->
+        <hr class="divider" />
+        <div class="divider-label">Quick Access</div>
+        <div class="quick-login-grid">
+            <span class="role-badge admin" onclick="quickLogin('admin@pricepoint.com')">🔐 Admin</span>
+            <span class="role-badge manager" onclick="quickLogin('manager@pricepoint.com')">📊 Manager</span>
+            <span class="role-badge pos" onclick="quickLogin('pos@pricepoint.com')">🛒 POS</span>
+            <span class="role-badge user" onclick="quickLogin('user@pricepoint.com')">👤 User</span>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:10px;color:#94a3b8;">
+            Password: <strong style="color:#64748b;font-family:monospace;">electronics2026</strong>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <a href="/" class="footer-link">← Back to Shop</a>
+            <span class="footer-divider">|</span>
+            <a href="#" class="footer-link">🆘 Help</a>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // QUICK LOGIN
+        // ============================================================
+        function quickLogin(email) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = 'electronics2026';
+            
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '⟳ Signing in...';
+            btn.disabled = true;
+            
+            setTimeout(function() {
+                document.getElementById('loginForm').submit();
+            }, 300);
+        }
+
+        // ============================================================
+        // AUTO-HIDE FLASH MESSAGES
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert, index) {
+                setTimeout(function() {
+                    alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateX(-10px)';
+                    setTimeout(function() {
+                        if (alert.parentNode) alert.remove();
+                    }, 500);
+                }, 4000 + (index * 200));
+            });
+        });
+
+        // ============================================================
+        // ENTER KEY SUBMIT
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var form = document.getElementById('loginForm');
+                var active = document.activeElement;
+                if (form && (active.id === 'loginEmail' || active.id === 'loginPassword')) {
+                    e.preventDefault();
+                    var btn = document.getElementById('loginBtn');
+                    btn.innerHTML = '⟳ Signing in...';
+                    btn.disabled = true;
+                    form.submit();
+                }
+            }
+        });
+
+        // ============================================================
+        // PREVENT MULTIPLE SUBMITS
+        // ============================================================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            var btn = document.getElementById('loginBtn');
+            if (btn.disabled) {
+                e.preventDefault();
+                return;
+            }
+            btn.innerHTML = '⟳ Signing in...';
+            btn.disabled = true;
+        });
+    </script>
+</body>
+</html>

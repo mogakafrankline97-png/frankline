@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PricePoint POS</title>
+    <link rel="manifest" href="/static/manifest.json" crossorigin="use-credentials">
+    <meta name="theme-color" content="#059669">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    
+    <script>
+        // ============================================================
+        // PWA ENTRY POINT - OFFLINE-FIRST
+        // ============================================================
+        
+        console.log('📱 PWA Entry Point');
+        console.log('📡 Network:', navigator.onLine ? '🟢 Online' : '🔴 Offline');
+
+        // Always go to the cached POS route when the app reloads.
+        // This avoids injecting stale HTML from localStorage, which can
+        // break the UI after a refresh in the installed PWA.
+        window.location.replace('/pos');
+    </script>
+</head>
+<body>
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;">
+        <div style="background:white;border-radius:20px;padding:40px;text-align:center;">
+            <div style="font-size:3rem;">💰</div>
+            <h1 style="color:#0f172a;">PricePoint POS</h1>
+            <p style="color:#64748b;">Loading...</p>
+        </div>
+    </div>
+</body>
+</html>

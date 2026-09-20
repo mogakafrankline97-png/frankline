@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Checkout · ACACIAMART</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+        * { font-family: 'Inter', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f4f8; color: #0b1a2f; min-height: 100vh; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .app-header {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .brand-icon-wrap {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, #0b2b1e, #1e4d34);
+            display: flex; align-items: center; justify-content: center;
+            color: #c7a86b; font-size: 1.2rem;
+            box-shadow: 0 6px 16px rgba(11,43,30,0.2);
+            flex-shrink: 0;
+        }
+        .brand-text { font-weight: 800; font-size: 1.35rem; color: #0b1a2f; letter-spacing: -0.5px; }
+        .brand-text span { 
+            background: linear-gradient(135deg, #0b2b1e, #1e4d34);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-link {
+            color: #5a6d7a; text-decoration: none; transition: all 0.3s;
+            font-weight: 500; font-size: 0.9rem; padding: 8px 16px;
+            border-radius: 40px; background: rgba(0,0,0,0.02);
+            border: 1px solid transparent;
+        }
+        .back-link:hover { background: #f1f5f9; color: #0b1a2f; border-color: #e2e8f0; }
+        .back-link i { margin-right: 6px; }
+
+        .glass-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.02);
+        }
+
+        .form-input {
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            padding: 12px 16px 12px 44px; width: 100%;
+            color: #0b1a2f; transition: all 0.3s;
+            background: #f8fafc; font-size: 0.95rem;
+        }
+        .form-input::placeholder { color: #94a3b8; }
+        .form-input:focus {
+            outline: none; border-color: #0b2b1e; background: white;
+            box-shadow: 0 0 0 4px rgba(11,43,30,0.06);
+        }
+        .form-label {
+            font-size: 0.75rem; font-weight: 600; color: #3d4f47;
+            display: block; margin-bottom: 4px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .form-label i { color: #0b2b1e; margin-right: 4px; }
+        .form-label .required { color: #dc2626; margin-left: 2px; }
+
+        .input-wrapper { position: relative; }
+        .input-wrapper .input-icon {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%); color: #94a3b8;
+            font-size: 1rem; z-index: 2;
+        }
+        .input-wrapper .form-input { padding-left: 44px; }
+        .input-wrapper textarea.form-input { padding-top: 14px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0b2b1e, #1e4d34);
+            color: white; padding: 16px 32px; border-radius: 9999px;
+            font-weight: 700; border: none; cursor: pointer;
+            transition: all 0.3s; width: 100%; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; box-shadow: 0 6px 20px rgba(11,43,30,0.2);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(11,43,30,0.3); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-outline {
+            border: 2px solid #e2e8f0; color: #3d4f47;
+            background: transparent; padding: 12px 24px;
+            border-radius: 9999px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s;
+            width: 100%; font-size: 0.95rem;
+        }
+        .btn-outline:hover { border-color: #0b2b1e; color: #0b2b1e; background: #f0fdf4; }
+
+        .payment-option {
+            border: 2px solid #e2e8f0; border-radius: 16px;
+            padding: 24px 20px; transition: all 0.4s;
+            cursor: pointer; background: white;
+            position: relative; overflow: hidden;
+        }
+        .payment-option:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+            border-color: #0b2b1e;
+        }
+        .payment-option .icon { font-size: 2.2rem; margin-bottom: 8px; display: block; }
+        .payment-option .title { font-weight: 700; color: #0b1a2f; font-size: 1.05rem; }
+        .payment-option .subtitle { font-size: 0.8rem; color: #5a6d7a; margin-top: 2px; }
+        .payment-option .badge {
+            display: inline-block; font-size: 0.6rem;
+            padding: 3px 12px; border-radius: 9999px;
+            font-weight: 600; margin-top: 8px;
+        }
+        .payment-option .badge.popular { background: #dbeafe; color: #2563eb; }
+        .payment-option .badge.mpesa { background: #d1fae5; color: #059669; }
+        .payment-option .badge.wa { background: #dcfce7; color: #16a34a; }
+
+        .step-indicator { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 32px; }
+        .step-item { display: flex; align-items: center; gap: 8px; }
+        .step-dot { width: 40px; height: 4px; border-radius: 2px; background: #e2e8f0; transition: all 0.6s; }
+        .step-dot.active { background: #0b2b1e; width: 60px; }
+        .step-dot.completed { background: #10b981; }
+        .step-number { font-size: 0.7rem; font-weight: 600; color: #94a3b8; }
+        .step-number.active { color: #0b2b1e; }
+        .step-number.completed { color: #10b981; }
+
+        .checkout-step { display: none; animation: slideUp 0.6s ease; }
+        .checkout-step.active { display: block; }
+
+        .summary-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-total {
+            display: flex; justify-content: space-between; padding: 14px 0;
+            margin-top: 8px; border-top: 2px solid #0b2b1e;
+            font-size: 1.2rem; font-weight: 700;
+        }
+        .summary-total .value { color: #0b2b1e; font-size: 1.5rem; }
+
+        .order-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .order-item:last-child { border-bottom: none; }
+        .order-item-image {
+            width: 52px; height: 52px; border-radius: 12px;
+            overflow: hidden; background: #f8fafc; flex-shrink: 0;
+            border: 1px solid #f1f5f9;
+        }
+        .order-item-image img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+        .order-item-name { font-weight: 600; color: #0b1a2f; font-size: 0.9rem; }
+        .order-item-price { font-weight: 700; color: #0b2b1e; font-size: 0.9rem; }
+        .order-item-quantity { color: #94a3b8; font-size: 0.8rem; font-weight: 500; }
+
+        .delivery-zone-select {
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            padding: 12px 16px 12px 44px; width: 100%;
+            color: #0b1a2f; transition: all 0.3s;
+            background: #f8fafc; font-size: 0.95rem;
+            appearance: none; cursor: pointer;
+        }
+        .delivery-zone-select:focus {
+            outline: none; border-color: #0b2b1e; background: white;
+            box-shadow: 0 0 0 4px rgba(11,43,30,0.06);
+        }
+
+        .location-detection {
+            background: #f0fdf4;
+            border: 2px dashed #0b2b1e;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .location-detection .spinner {
+            width: 24px; height: 24px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #0b2b1e;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+        .location-detection.success {
+            background: #f0fdf4;
+            border-color: #10b981;
+            border-style: solid;
+        }
+        .location-detection.error {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            border-style: solid;
+        }
+
+        .toast {
+            position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+            background: white; padding: 18px 24px; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            animation: slideUp 0.4s ease; max-width: 420px;
+            backdrop-filter: blur(12px);
+        }
+        .toast.hidden { display: none; }
+
+        .confetti-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9998; overflow: hidden;
+        }
+        .confetti-piece {
+            position: absolute; width: 10px; height: 10px;
+            border-radius: 2px; animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .tracking-number {
+            font-family: 'Courier New', monospace;
+            background: #0b2b1e; color: #c7a86b;
+            padding: 4px 12px; border-radius: 8px;
+            font-weight: 700; letter-spacing: 1px;
+        }
+
+        /* ===== FULFILLMENT TOGGLE ===== */
+        .fulfillment-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .fulfillment-btn {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            background: white;
+            font-weight: 700;
+            color: #5a6d7a;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-align: center;
+            font-family: inherit;
+        }
+        .fulfillment-btn:hover {
+            border-color: #0b2b1e;
+        }
+        .fulfillment-btn.active {
+            border-color: #0b2b1e;
+            background: #f0fdf4;
+            color: #0b2b1e;
+            box-shadow: 0 4px 16px rgba(11,43,30,0.1);
+        }
+        .fulfillment-btn .subtitle {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .fulfillment-btn.active .subtitle {
+            color: #3d4f47;
+        }
+
+        .pickup-info {
+            background: #f0fdf4;
+            border: 2px dashed #0b2b1e;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .pickup-info.visible { display: block; animation: slideUp 0.4s ease; }
+
+        @media (max-width: 768px) {
+            .glass-card { padding: 18px; }
+            .brand-text { font-size: 1.1rem; }
+            .back-link { font-size: 0.8rem; padding: 6px 12px; }
+            .step-dot { width: 30px; }
+            .step-dot.active { width: 40px; }
+            .payment-option { padding: 16px; }
+            .toast { right: 16px; left: 16px; max-width: none; bottom: 16px; }
+        }
+        @media (max-width: 480px) {
+            .glass-card { padding: 14px; border-radius: 14px; }
+            .form-input { font-size: 0.85rem; padding: 10px 14px 10px 40px; }
+            .btn-primary { font-size: 0.9rem; padding: 12px 20px; }
+            .btn-outline { font-size: 0.85rem; padding: 10px 16px; }
+            .order-item-image { width: 40px; height: 40px; }
+            .order-item-name { font-size: 0.8rem; }
+            .payment-option .icon { font-size: 1.6rem; }
+            .payment-option .title { font-size: 0.9rem; }
+            .summary-total .value { font-size: 1.2rem; }
+            .fulfillment-btn { padding: 10px; font-size: 0.8rem; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+            <a href="/" class="flex items-center gap-3">
+                <span class="brand-icon-wrap"><i class="fas fa-shopping-basket"></i></span>
+                <span class="brand-text">ACACIA<span>MART</span></span>
+                <span class="text-[0.5rem] font-bold text-white bg-[#0b2b1e] px-2 py-0.5 rounded-full">KE</span>
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="/cart" class="back-link"><i class="fas fa-arrow-left"></i> Back to Cart</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-[#0b1a2f] tracking-tight">
+                    Checkout <span class="text-sm font-normal text-gray-400 ml-2">• Secure</span>
+                </h1>
+                <p class="text-gray-500 text-sm mt-1 flex items-center gap-2">
+                    <i class="fas fa-lock text-[#0b2b1e] text-xs"></i> Your information is safe
+                </p>
+            </div>
+            <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
+                <span class="text-gray-400 text-sm">Total:</span>
+                <span class="font-bold text-[#0b2b1e] text-lg" id="orderTotal">KSh {{ "%.0f"|format(total) }}</span>
+            </div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step-item"><span class="step-number active" id="step1Num">1</span><div class="step-dot active" id="step1Dot"></div></div>
+            <div class="step-item"><span class="step-number" id="step2Num">2</span><div class="step-dot" id="step2Dot"></div></div>
+            <div class="step-item"><span class="step-number" id="step3Num">3</span><div class="step-dot" id="step3Dot"></div></div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <div class="glass-card">
+                    <!-- Step 1: Shipping -->
+                    <div class="checkout-step active" id="step1">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-[#0b2b1e] text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-[#0b2b1e]/20">1</div>
+                            <div>
+                                <h2 class="text-xl font-bold text-[#0b1a2f]">Shipping Information</h2>
+                                <p class="text-sm text-gray-400">Where should we deliver your order?</p>
+                            </div>
+                        </div>
+
+                        <!-- ===== FULFILLMENT TOGGLE (DELIVERY / PICKUP) ===== -->
+                        <div class="fulfillment-toggle">
+                            <button type="button" id="deliveryToggleBtn" class="fulfillment-btn active" onclick="setFulfillment('delivery')">
+                                🚚 Delivery
+                                <div class="subtitle">Deliver to your address</div>
+                            </button>
+                            <button type="button" id="pickupToggleBtn" class="fulfillment-btn" onclick="setFulfillment('pickup')">
+                                🏪 Pickup
+                                <div class="subtitle">Pick from our store</div>
+                            </button>
+                        </div>
+
+                        <!-- ===== PICKUP INFO ===== -->
+                        <div class="pickup-info" id="pickupInfo">
+                            <div style="display:flex;gap:12px;align-items:flex-start;">
+                                <i class="fas fa-store" style="color:#0b2b1e;font-size:1.4rem;margin-top:2px;"></i>
+                                <div>
+                                    <p style="font-weight:700;color:#0b2b1e;font-size:0.95rem;">Pickup at Our Store</p>
+                                    <p style="font-size:0.8rem;color:#3d4f47;margin-top:4px;">
+                                        📍 Rongai, Kenya<br>
+                                        📞 0717365706<br>
+                                        🕐 Open 7am – 8pm daily
+                                    </p>
+                                    <p style="font-size:0.75rem;color:#059669;font-weight:600;margin-top:8px;">
+                                        ✅ No delivery fee · Pick up at your convenience
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Detection -->
+                        <div class="location-detection" id="locationStatus">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div class="spinner" id="locationSpinner"></div>
+                                <div id="locationMessage" style="flex:1;">
+                                    <span style="font-weight:600;font-size:0.9rem;">📍 Detecting your location...</span>
+                                    <p style="font-size:0.75rem;color:#5a6d7a;">We'll calculate delivery cost from our store</p>
+                                </div>
+                                <button onclick="retryLocation()" style="font-size:0.75rem;background:#0b2b1e;color:white;padding:6px 14px;border-radius:9999px;font-weight:600;border:none;cursor:pointer;display:none;" id="locationRetryBtn">
+                                    <i class="fas fa-redo"></i> Retry
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4 mt-4" id="deliveryFields">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label"><i class="fas fa-user"></i> First Name <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-user input-icon"></i>
+                                        <input type="text" class="form-input" placeholder="John" id="firstName" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label"><i class="fas fa-user"></i> Last Name <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-user input-icon"></i>
+                                        <input type="text" class="form-input" placeholder="Doe" id="lastName" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-envelope"></i> Email Address <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-envelope input-icon"></i>
+                                    <input type="email" class="form-input" placeholder="john@example.com" id="email" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-phone"></i> Phone Number <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <input type="tel" class="form-input" placeholder="0712345678" id="phone" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-map-marker-alt"></i> Delivery Address <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-marker-alt input-icon"></i>
+                                    <input type="text" class="form-input" placeholder="123 Main Street" id="address" onchange="geocodeAddress()" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label"><i class="fas fa-city"></i> City <span class="required">*</span></label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-city input-icon"></i>
+                                        <input type="text" class="form-input" placeholder="Nairobi" id="city" onchange="geocodeAddress()" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label"><i class="fas fa-mailbox"></i> Postal Code</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-mailbox input-icon"></i>
+                                        <input type="text" class="form-input" placeholder="00100" id="zip" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label"><i class="fas fa-globe"></i> Country <span class="required">*</span></label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-globe input-icon"></i>
+                                    <input type="text" class="form-input" placeholder="Kenya" id="country" value="Kenya" onchange="geocodeAddress()" />
+                                </div>
+                            </div>
+
+                            <!-- Delivery Fee Display -->
+                            <div id="deliveryFeeDisplay" style="display:none;">
+                                <div style="background:#f0fdf4;border:1px solid #d1fae5;border-radius:12px;padding:16px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                        <span style="font-size:0.9rem;font-weight:700;color:#0b2b1e;">
+                                            <i class="fas fa-truck"></i> Delivery Fee
+                                        </span>
+                                        <span style="font-size:1.2rem;font-weight:800;color:#0b2b1e;" id="deliveryFeeAmount">KSh 0</span>
+                                    </div>
+                                    <div style="font-size:0.75rem;color:#5a6d7a;border-top:1px solid #d1fae5;padding-top:8px;">
+                                        <div style="display:flex;justify-content:space-between;">
+                                            <span>📍 Distance from store</span>
+                                            <span style="font-weight:600;" id="distanceDisplay">- km</span>
+                                        </div>
+                                        <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                                            <span>💰 Rate applied</span>
+                                            <span style="font-weight:600;" id="rateDisplay">-</span>
+                                        </div>
+                                    </div>
+                                    <div id="freeDeliveryMessage" style="display:none;font-size:0.75rem;color:#10b981;margin-top:8px;font-weight:600;">
+                                        🎉 FREE DELIVERY applied!
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="shippingPending" style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px;font-size:0.85rem;color:#92400e;">
+                                <i class="fas fa-info-circle"></i> Enter your address to calculate delivery fee
+                            </div>
+
+                            <!-- Manual fallback for zone -->
+                            <div id="manualZoneFallback" style="display:none;">
+                                <label class="form-label"><i class="fas fa-truck"></i> Delivery Zone (Manual)</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-marker-alt input-icon"></i>
+                                    <select class="delivery-zone-select" id="deliveryZone" onchange="updateDeliveryFee()">
+                                        <option value="">-- Select your delivery zone --</option>
+                                        <option value="zone_1" data-fee="50"  data-min="0"   data-max="0.5">Zone 1 (0 - 500m) - KSh 50</option>
+                                        <option value="zone_2" data-fee="100" data-min="0.5" data-max="1">Zone 2 (500m - 1km) - KSh 100</option>
+                                        <option value="zone_3" data-fee="200" data-min="1"   data-max="5">Zone 3 (1km - 5km) - KSh 200</option>
+                                        <option value="zone_4" data-fee="300" data-min="5"   data-max="10">Zone 4 (5km - 10km) - KSh 300</option>
+                                        <option value="zone_5" data-fee="400" data-min="10"  data-max="20">Zone 5 (10km - 20km) - KSh 400</option>
+                                        <option value="zone_6" data-fee="500" data-min="20"  data-max="999">Zone 6 (20km+) - KSh 500</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="form-label"><i class="fas fa-pen"></i> Delivery Instructions (Optional)</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-pen input-icon"></i>
+                                    <textarea class="form-input" id="deliveryNotes" rows="2" placeholder="Gate code, landmark, special instructions..." style="min-height:60px;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="goToStep(2)" class="btn-primary mt-6" id="continueToPaymentBtn">
+                            Continue to Payment <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Payment -->
+                    <div class="checkout-step" id="step2">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-full bg-[#0b2b1e] text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-[#0b2b1e]/20">2</div>
+                            <div>
+                                <h2 class="text-xl font-bold text-[#0b1a2f]">Choose Payment Method</h2>
+                                <p class="text-sm text-gray-400">Select how you'd like to complete your order</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-[#f0fdf4] to-[#ecfdf5] border border-[#d1fae5] rounded-xl p-4 mb-6 flex items-start gap-3">
+                            <i class="fas fa-shield-alt text-[#0b2b1e] text-lg mt-0.5"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-[#0b2b1e]">🔒 Secure Checkout</p>
+                                <p class="text-xs text-[#3d4f47]">Your payment is encrypted. We never store your card details.</p>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <!-- M-Pesa -->
+                            <div class="payment-option" id="mpesaOption">
+                                <span class="icon">📱</span>
+                                <div class="title">M-Pesa</div>
+                                <div class="subtitle">Enter your phone — we'll send the M-Pesa prompt</div>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="badge mpesa">💳 M-Pesa</span>
+                                    <span class="badge popular">✓ Instant</span>
+                                </div>
+                                <button class="mt-3 w-full bg-[#0b2b1e] text-white py-2.5 px-4 rounded-full font-semibold text-sm hover:bg-[#061a12] transition-all shadow-lg shadow-[#0b2b1e]/20" id="mpesaPayBtn">
+                                    <i class="fas fa-mobile-alt"></i> Pay KSh {{ "%.0f"|format(total) }}
+                                </button>
+                                <p style="font-size:0.65rem;color:#94a3b8;margin-top:8px;text-align:center;">
+                                    <i class="fas fa-info-circle"></i>
+                                    No prompt within 30s? Use WhatsApp below.
+                                </p>
+                            </div>
+
+                            <!-- WhatsApp Order -->
+                            <div class="payment-option" id="whatsappOption" style="border-color:#25D366;">
+                                <span class="icon">💬</span>
+                                <div class="title">Order via WhatsApp</div>
+                                <div class="subtitle">Send your cart to us on WhatsApp</div>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="badge wa">💬 WhatsApp</span>
+                                    <span class="badge popular">✓ Confirm fast</span>
+                                </div>
+                                <button class="mt-3 w-full bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white py-2.5 px-4 rounded-full font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-[#25D366]/30" id="whatsappOrderBtn">
+                                    <i class="fab fa-whatsapp"></i> Order via WhatsApp
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- M-Pesa Status -->
+                        <div id="mpesaStatus" style="display:none;margin-top:16px;padding:16px;border-radius:12px;border:2px solid #0b2b1e;background:#f0fdf4;">
+                            <div id="mpesaStatusMessage" style="font-size:0.9rem;font-weight:600;color:#0b2b1e;"></div>
+                            <div id="mpesaStatusLoader" style="display:none;text-align:center;margin-top:8px;">
+                                <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:#0b2b1e;"></i>
+                                <p style="font-size:0.7rem;color:#5a6d7a;margin-top:4px;">Waiting for confirmation...</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 mt-6">
+                            <button onclick="goToStep(1)" class="btn-outline flex-1">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Confirmation -->
+                    <div class="checkout-step" id="step3">
+                        <div class="text-center">
+                            <div class="w-28 h-28 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-6 animate-bounce">
+                                <i class="fas fa-check text-5xl text-[#0b2b1e]"></i>
+                            </div>
+                            <h2 class="text-3xl font-extrabold text-[#0b1a2f]">Order Placed! 🎉</h2>
+                            <p class="text-gray-500 mt-2" id="orderTypeMessage">Your order has been confirmed</p>
+
+                            <div class="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 text-left">
+                                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                                    <div>
+                                        <p class="text-gray-400 text-sm font-medium">Order ID</p>
+                                        <p class="text-[#0b1a2f] font-bold text-xl tracking-wider" id="orderId">PP-XXXXXXXX</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-400 text-sm font-medium">Tracking Number</p>
+                                        <p class="tracking-number text-sm" id="trackingNumber">AC-XXXXXX-KE</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 p-3 bg-white rounded-lg border border-gray-100 text-sm">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-map-marker-alt text-[#0b2b1e] mt-0.5"></i>
+                                        <div>
+                                            <p class="font-medium text-[#0b1a2f]" id="deliveryName">John Doe</p>
+                                            <p class="text-gray-500" id="deliveryAddress">123 Main Street, Nairobi, Kenya</p>
+                                            <p class="text-gray-400 text-xs" id="deliveryNotesDisplay"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                                <a href="/" class="btn-primary">
+                                    <i class="fas fa-arrow-left"></i> Continue Shopping
+                                </a>
+                                <a href="/admin/orders" class="btn-outline" style="width:auto;padding:14px 24px;">
+                                    <i class="fas fa-eye"></i> View Orders
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="glass-card sticky top-24">
+                    <h3 class="font-bold text-[#0b1a2f] text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-receipt text-[#0b2b1e]"></i> Order Summary
+                    </h3>
+
+                    <div class="max-h-60 overflow-y-auto pr-1">
+                        {% for item in cart_items %}
+                        <div class="order-item">
+                            <div class="order-item-image">
+                                <img src="{{ item.image }}" alt="{{ item.name }}" onerror="this.style.display='none'">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="order-item-name truncate">{{ item.name }}</div>
+                                <div class="order-item-price">KSh {{ "%.0f"|format(item.price) }}</div>
+                            </div>
+                            <div class="order-item-quantity">×{{ item.quantity }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="border-t border-gray-100 mt-4 pt-4 space-y-2 text-sm">
+                        <div class="summary-item">
+                            <span class="text-gray-500">Subtotal</span>
+                            <span class="text-[#0b1a2f] font-semibold" id="summarySubtotal">KSh {{ "%.0f"|format(subtotal) }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="text-gray-500" id="shippingLabel">Delivery Fee</span>
+                            <span class="font-semibold text-[#0b2b1e]" id="shippingCostDisplay2">
+                                <span id="shippingPendingText">⏳ Detecting...</span>
+                            </span>
+                        </div>
+                        <div class="summary-total">
+                            <span class="text-[#0b1a2f]">Total</span>
+                            <span class="value" id="totalDisplay">KSh {{ "%.0f"|format(total) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-2 text-xs text-gray-400 flex items-center gap-1" id="freeShippingInfo">
+                        <i class="fas fa-info-circle text-[#0b2b1e]"></i>
+                        <span>Free delivery on orders over KSh 5,000</span>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-3 text-xs text-gray-400">
+                        <span><i class="fas fa-lock text-[#0b2b1e]"></i> Secure</span>
+                        <span><i class="fas fa-undo text-amber-500"></i> 30-Day Returns</span>
+                        <span><i class="fas fa-shield-alt text-blue-500"></i> Warranty</span>
+                        <span><i class="fas fa-truck text-purple-500"></i> Fast Delivery</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <div id="toast" class="toast hidden">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-check-circle text-[#0b2b1e] text-xl" id="toastIcon"></i>
+            <div>
+                <p id="toastMessage" class="font-semibold text-[#0b1a2f]"></p>
+                <p id="toastSubMessage" class="text-xs text-gray-400"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    console.log('🚀 ACACIAMART Checkout Loaded - Distance-Based Delivery + Pickup');
+
+    // ============================================================
+    // CONFIG - STORE LOCATION & DELIVERY RATES
+    // ============================================================
+    const STORE_LAT = -1.399201;
+    const STORE_LNG = 36.725749;
+    const FREE_DELIVERY_THRESHOLD = 5000;
+
+    function getDeliveryFee(distanceKm) {
+        if (distanceKm <= 0.5)  return { fee: 50,  rate: '0 - 500m' };
+        if (distanceKm <= 1.0)  return { fee: 100, rate: '500m - 1km' };
+        if (distanceKm <= 5.0)  return { fee: 200, rate: '1km - 5km' };
+        if (distanceKm <= 10.0) return { fee: 300, rate: '5km - 10km' };
+        if (distanceKm <= 20.0) return { fee: 400, rate: '10km - 20km' };
+        return { fee: 500, rate: '20km+' };
+    }
+
+    // ============================================================
+    // GLOBAL VARIABLES
+    // ============================================================
+    let currentStep = 1;
+    let orderPlaced = false;
+    let shippingCost = 0;
+    let shippingCalculated = false;
+    let subtotal = {{ subtotal }};
+    let totalAmount = {{ total }};
+    let mpesaCheckoutId = null;
+    let mpesaStatusInterval = null;
+    let mpesaStartTime = null;
+    let isProcessingPayment = false;
+    let selectedZone = null;
+    let detectedDistance = 0;
+    let locationDetected = false;
+    let mpesaEscalated = false;
+    let fulfillmentType = 'delivery';   // 'delivery' or 'pickup'
+
+    // ============================================================
+    // FULFILLMENT TOGGLE: DELIVERY vs PICKUP
+    // ============================================================
+    function setFulfillment(type) {
+        fulfillmentType = type;
+
+        const deliveryBtn = document.getElementById('deliveryToggleBtn');
+        const pickupBtn = document.getElementById('pickupToggleBtn');
+        const pickupInfo = document.getElementById('pickupInfo');
+        const locationStatus = document.getElementById('locationStatus');
+        const deliveryFields = document.getElementById('deliveryFields');
+        const deliveryFeeDisplay = document.getElementById('deliveryFeeDisplay');
+        const shippingPending = document.getElementById('shippingPending');
+        const manualZoneFallback = document.getElementById('manualZoneFallback');
+        const shippingLabel = document.getElementById('shippingLabel');
+
+        if (type === 'pickup') {
+            deliveryBtn.classList.remove('active');
+            pickupBtn.classList.add('active');
+
+            pickupInfo.classList.add('visible');
+            if (locationStatus) locationStatus.style.display = 'none';
+            if (deliveryFeeDisplay) deliveryFeeDisplay.style.display = 'none';
+            if (shippingPending) shippingPending.style.display = 'none';
+            if (manualZoneFallback) manualZoneFallback.style.display = 'none';
+            if (shippingLabel) shippingLabel.textContent = 'Pickup';
+
+            // Set shipping to 0
+            shippingCost = 0;
+            shippingCalculated = true;
+            detectedDistance = 0;
+            selectedZone = null;
+
+            updateTotalsDisplay();
+            showToast('🏪 Pickup selected', 'success', 'No delivery fee · Pick up at our store');
+
+        } else {
+            pickupBtn.classList.remove('active');
+            deliveryBtn.classList.add('active');
+
+            pickupInfo.classList.remove('visible');
+            if (locationStatus) locationStatus.style.display = 'block';
+            if (shippingLabel) shippingLabel.textContent = 'Delivery Fee';
+
+            shippingCalculated = false;
+            shippingCost = 0;
+
+            // Re-run location detection
+            if (typeof detectLocation === 'function') {
+                detectLocation();
+            }
+
+            showToast('🚚 Delivery selected', 'info', 'Calculating delivery fee...');
+        }
+    }
+
+    // ============================================================
+    // HAVERSINE DISTANCE FORMULA
+    // ============================================================
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // ============================================================
+    // DETECT GPS LOCATION
+    // ============================================================
+    function detectLocation() {
+        if (fulfillmentType === 'pickup') {
+            console.log('📍 Pickup mode — skipping location detection');
+            return;
+        }
+
+        console.log('📍 Detecting GPS location...');
+        const statusDiv = document.getElementById('locationStatus');
+        const spinner = document.getElementById('locationSpinner');
+        const messageEl = document.getElementById('locationMessage');
+        const retryBtn = document.getElementById('locationRetryBtn');
+
+        spinner.style.display = 'block';
+        messageEl.innerHTML = '<span style="font-weight:600;font-size:0.9rem;">📍 Detecting your location...</span><p style="font-size:0.75rem;color:#5a6d7a;">Please allow location access</p>';
+        retryBtn.style.display = 'none';
+        statusDiv.classList.remove('success', 'error');
+
+        if (!navigator.geolocation) {
+            handleLocationError('Geolocation not supported by your browser');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const distance = haversineDistance(STORE_LAT, STORE_LNG, userLat, userLng);
+
+                console.log(`📍 Location: (${userLat}, ${userLng}) | Distance: ${distance.toFixed(2)} km`);
+
+                detectedDistance = distance;
+                locationDetected = true;
+                spinner.style.display = 'none';
+                statusDiv.classList.add('success');
+                statusDiv.classList.remove('error');
+
+                messageEl.innerHTML = `
+                    <span style="font-weight:700;font-size:0.9rem;color:#059669;">
+                        <i class="fas fa-check-circle"></i> Location detected!
+                    </span>
+                    <p style="font-size:0.75rem;color:#5a6d7a;">
+                        Distance from store: <strong>${distance.toFixed(2)} km</strong>
+                    </p>
+                `;
+                retryBtn.style.display = 'inline-block';
+
+                applyDistanceDelivery(distance);
+                const { fee, rate } = getDeliveryFee(distance);
+                showToast('📍 Location detected!', 'success', `${distance.toFixed(2)} km · ${rate} · KSh ${fee}`);
+            },
+            (error) => {
+                console.log('⚠️ GPS error:', error.message);
+                let msg = 'Could not detect location. Enter address manually or select zone.';
+                if (error.code === 1) msg = 'Location access denied. Enter address manually or select zone.';
+                else if (error.code === 2) msg = 'Location unavailable. Enter address manually or select zone.';
+                else if (error.code === 3) msg = 'Location timeout. Enter address manually or select zone.';
+                handleLocationError(msg);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+
+    function handleLocationError(msg) {
+        const statusDiv = document.getElementById('locationStatus');
+        const spinner = document.getElementById('locationSpinner');
+        const messageEl = document.getElementById('locationMessage');
+        const retryBtn = document.getElementById('locationRetryBtn');
+
+        spinner.style.display = 'none';
+        statusDiv.classList.add('error');
+        statusDiv.classList.remove('success');
+        messageEl.innerHTML = `
+            <span style="font-weight:600;font-size:0.85rem;color:#92400e;">
+                ⚠️ ${msg}
+            </span>
+            <p style="font-size:0.7rem;color:#78350f;margin-top:4px;">
+                You can enter your address or select a zone manually below.
+            </p>
+        `;
+        retryBtn.style.display = 'inline-block';
+        document.getElementById('manualZoneFallback').style.display = 'block';
+    }
+
+    function retryLocation() {
+        console.log('📍 Retrying location...');
+        detectLocation();
+    }
+
+    // ============================================================
+    // GEOCODE ADDRESS (if GPS fails)
+    // ============================================================
+    function geocodeAddress() {
+        if (fulfillmentType === 'pickup') return;
+
+        const address = document.getElementById('address').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const country = document.getElementById('country').value.trim() || 'Kenya';
+
+        if (!address || !city) return;
+
+        const fullAddress = `${address}, ${city}, ${country}`;
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullAddress)}&format=json&limit=1`;
+
+        console.log('📍 Geocoding:', fullAddress);
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    const distance = haversineDistance(STORE_LAT, STORE_LNG, lat, lon);
+
+                    console.log(`📍 Address geocoded. Distance: ${distance.toFixed(2)} km`);
+
+                    detectedDistance = distance;
+                    locationDetected = true;
+
+                    const statusDiv = document.getElementById('locationStatus');
+                    const spinner = document.getElementById('locationSpinner');
+                    const messageEl = document.getElementById('locationMessage');
+                    const retryBtn = document.getElementById('locationRetryBtn');
+
+                    spinner.style.display = 'none';
+                    statusDiv.classList.add('success');
+                    statusDiv.classList.remove('error');
+                    messageEl.innerHTML = `
+                        <span style="font-weight:700;font-size:0.9rem;color:#059669;">
+                            <i class="fas fa-check-circle"></i> Address found!
+                        </span>
+                        <p style="font-size:0.75rem;color:#5a6d7a;">
+                            Distance from store: <strong>${distance.toFixed(2)} km</strong>
+                        </p>
+                    `;
+                    retryBtn.style.display = 'inline-block';
+
+                    applyDistanceDelivery(distance);
+                    const { fee, rate } = getDeliveryFee(distance);
+                    showToast('📍 Address located!', 'success', `${distance.toFixed(2)} km · ${rate} · KSh ${fee}`);
+                } else {
+                    console.log('⚠️ Address not found');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Geocoding error:', error);
+            });
+    }
+
+    // ============================================================
+    // APPLY DISTANCE-BASED DELIVERY FEE
+    // ============================================================
+    function applyDistanceDelivery(distanceKm) {
+        if (fulfillmentType === 'pickup') {
+            shippingCost = 0;
+            shippingCalculated = true;
+            updateTotalsDisplay();
+            return;
+        }
+
+        const { fee, rate } = getDeliveryFee(distanceKm);
+
+        if (subtotal >= FREE_DELIVERY_THRESHOLD) {
+            shippingCost = 0;
+            document.getElementById('freeDeliveryMessage').style.display = 'block';
+        } else {
+            shippingCost = fee;
+            document.getElementById('freeDeliveryMessage').style.display = 'none';
+        }
+
+        shippingCalculated = true;
+
+        document.getElementById('deliveryFeeDisplay').style.display = 'block';
+        document.getElementById('shippingPending').style.display = 'none';
+        document.getElementById('manualZoneFallback').style.display = 'none';
+
+        document.getElementById('deliveryFeeAmount').textContent = shippingCost === 0 
+            ? 'FREE 🎉' 
+            : 'KSh ' + shippingCost.toLocaleString();
+        document.getElementById('distanceDisplay').textContent = distanceKm.toFixed(2) + ' km';
+        document.getElementById('rateDisplay').textContent = rate;
+
+        updateTotalsDisplay();
+    }
+
+    // ============================================================
+    // MANUAL ZONE FALLBACK
+    // ============================================================
+    function updateDeliveryFee() {
+        if (fulfillmentType === 'pickup') return;
+
+        const select = document.getElementById('deliveryZone');
+        const selected = select.options[select.selectedIndex];
+
+        if (!selected || !selected.value) {
+            document.getElementById('deliveryFeeDisplay').style.display = 'none';
+            shippingCost = 0;
+            shippingCalculated = false;
+            updateTotalsDisplay();
+            return;
+        }
+
+        selectedZone = selected.value;
+        const baseFee = parseFloat(selected.dataset.fee) || 0;
+        const minDist = parseFloat(selected.dataset.min) || 0;
+        const maxDist = parseFloat(selected.dataset.max) || 0;
+
+        detectedDistance = (minDist + maxDist) / 2;
+
+        if (subtotal >= FREE_DELIVERY_THRESHOLD) {
+            shippingCost = 0;
+            document.getElementById('freeDeliveryMessage').style.display = 'block';
+        } else {
+            shippingCost = baseFee;
+            document.getElementById('freeDeliveryMessage').style.display = 'none';
+        }
+
+        shippingCalculated = true;
+        document.getElementById('deliveryFeeDisplay').style.display = 'block';
+        document.getElementById('shippingPending').style.display = 'none';
+        document.getElementById('deliveryFeeAmount').textContent = shippingCost === 0 
+            ? 'FREE 🎉' 
+            : 'KSh ' + shippingCost.toLocaleString();
+        document.getElementById('distanceDisplay').textContent = detectedDistance.toFixed(2) + ' km (estimated)';
+        document.getElementById('rateDisplay').textContent = selected.textContent;
+
+        updateTotalsDisplay();
+    }
+
+    // ============================================================
+    // UPDATE TOTALS DISPLAY
+    // ============================================================
+    function updateTotalsDisplay() {
+        if (subtotal >= FREE_DELIVERY_THRESHOLD) {
+            shippingCost = 0;
+            shippingCalculated = true;
+        }
+        totalAmount = subtotal + shippingCost;
+
+        const shippingDisplayEl = document.getElementById('shippingCostDisplay2');
+        if (fulfillmentType === 'pickup') {
+            shippingDisplayEl.textContent = 'FREE (Pickup) 🏪';
+        } else if (shippingCost === 0) {
+            shippingDisplayEl.textContent = 'FREE 🎉';
+        } else {
+            shippingDisplayEl.textContent = 'KSh ' + shippingCost.toLocaleString();
+        }
+
+        document.getElementById('totalDisplay').textContent = 'KSh ' + totalAmount.toLocaleString();
+        document.getElementById('orderTotal').textContent = 'KSh ' + totalAmount.toLocaleString();
+
+        const mpesaBtn = document.getElementById('mpesaPayBtn');
+        if (mpesaBtn) {
+            mpesaBtn.innerHTML = `<i class="fas fa-mobile-alt"></i> Pay KSh ${totalAmount.toLocaleString()}`;
+        }
+
+        const freeShippingInfo = document.getElementById('freeShippingInfo');
+        if (fulfillmentType === 'pickup') {
+            freeShippingInfo.innerHTML = '<i class="fas fa-store text-[#0b2b1e]"></i> <span class="text-[#0b2b1e] font-semibold">🏪 Pickup selected — no delivery fee</span>';
+        } else if (subtotal >= FREE_DELIVERY_THRESHOLD) {
+            freeShippingInfo.innerHTML = '<i class="fas fa-gift text-[#0b2b1e]"></i> <span class="text-[#0b2b1e] font-semibold">🎉 FREE DELIVERY applied!</span>';
+        } else {
+            const remaining = FREE_DELIVERY_THRESHOLD - subtotal;
+            freeShippingInfo.innerHTML = `<i class="fas fa-info-circle text-[#0b2b1e]"></i> <span>Add KSh ${remaining.toLocaleString()} more for FREE delivery</span>`;
+        }
+    }
+
+    // ============================================================
+    // STEP NAVIGATION
+    // ============================================================
+    function goToStep(step) {
+        if (step === 2 && !shippingCalculated) {
+            showToast('⚠️ Please wait for location detection or select a zone', 'warning');
+            return;
+        }
+
+        document.querySelectorAll('.checkout-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+
+        for (let i = 1; i <= 3; i++) {
+            const dot = document.getElementById('step' + i + 'Dot');
+            const num = document.getElementById('step' + i + 'Num');
+            dot.classList.remove('active', 'completed');
+            num.classList.remove('active', 'completed');
+            if (i < step) { dot.classList.add('completed'); num.classList.add('completed'); }
+            if (i === step) { dot.classList.add('active'); num.classList.add('active'); }
+        }
+        currentStep = step;
+        document.querySelector('.glass-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ============================================================
+    // GET CUSTOMER DATA
+    // ============================================================
+    function getCustomerData() {
+        const effectiveShipping = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : shippingCost;
+        return {
+            first_name: document.getElementById('firstName').value.trim(),
+            last_name: document.getElementById('lastName').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            zip: document.getElementById('zip').value.trim(),
+            country: document.getElementById('country').value.trim() || 'Kenya',
+            delivery_notes: document.getElementById('deliveryNotes').value.trim(),
+            shipping_cost: effectiveShipping,
+            delivery_zone: selectedZone,
+            distance_km: detectedDistance,
+            fulfillment_type: fulfillmentType
+        };
+    }
+
+    function validateCustomerData() {
+        const data = getCustomerData();
+
+        const basicFields = !data.first_name || !data.last_name || !data.email || !data.phone;
+        const addressFields = !data.address || !data.city;
+
+        if (basicFields) {
+            showToast('⚠️ Please fill in name, email, and phone', 'warning');
+            goToStep(1);
+            return false;
+        }
+
+        // Only require address if DELIVERY
+        if (fulfillmentType === 'delivery' && addressFields) {
+            showToast('⚠️ Please fill in delivery address', 'warning');
+            goToStep(1);
+            return false;
+        }
+
+        if (!shippingCalculated) {
+            showToast('⚠️ Please wait for location or select a zone', 'warning');
+            goToStep(1);
+            return false;
+        }
+
+        return true;
+    }
+
+    // ============================================================
+    // GENERATE TRACKING NUMBER
+    // ============================================================
+    function generateTrackingNumber() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        return 'AC-' + code + '-KE';
+    }
+
+    // ============================================================
+    // PAY WITH M-PESA
+    // ============================================================
+    function payWithMpesa() {
+        if (isProcessingPayment) return;
+        if (orderPlaced) return;
+        if (!validateCustomerData()) return;
+
+        const phoneInput = document.getElementById('phone').value.trim();
+        if (!phoneInput) {
+            showToast('⚠️ Please enter your phone number for M-Pesa', 'warning');
+            document.getElementById('phone').focus();
+            return;
+        }
+
+        let cleaned = phoneInput.replace(/\D/g, '');
+        if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+        if (!cleaned.startsWith('254')) cleaned = '254' + cleaned;
+        const formattedPhone = cleaned;
+
+        if (formattedPhone.length !== 12) {
+            showToast('⚠️ Please enter a valid phone number (e.g., 0712345678)', 'warning');
+            document.getElementById('phone').focus();
+            return;
+        }
+
+        isProcessingPayment = true;
+        mpesaEscalated = false;
+
+        const mpesaBtn = document.getElementById('mpesaPayBtn');
+        const waBtn = document.getElementById('whatsappOrderBtn');
+
+        if (mpesaBtn) { mpesaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; mpesaBtn.disabled = true; }
+        if (waBtn) waBtn.disabled = true;
+
+        const statusDiv = document.getElementById('mpesaStatus');
+        const statusMsg = document.getElementById('mpesaStatusMessage');
+        const loader = document.getElementById('mpesaStatusLoader');
+
+        statusDiv.style.display = 'block';
+        statusMsg.innerHTML = '⏳ Sending STK Push to your phone...';
+        loader.style.display = 'block';
+
+        const orderId = 'ORD-' + Date.now().toString(36).toUpperCase();
+        mpesaStartTime = Date.now();
+
+        fetch('/mpesa/initiate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                phone: formattedPhone,
+                amount: totalAmount,
+                order_id: orderId
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                mpesaCheckoutId = data.checkout_request_id;
+                statusMsg.innerHTML = '✅ STK Push sent! <br><small>Check your phone and enter PIN to confirm payment.</small>';
+                loader.style.display = 'none';
+                showToast('📱 STK Push sent to your phone', 'success');
+                pollMpesaStatus(mpesaCheckoutId);
+            } else {
+                statusMsg.innerHTML = '❌ ' + data.message;
+                loader.style.display = 'none';
+                showToast('❌ ' + data.message, 'error');
+                resetPaymentButtons();
+            }
+        })
+        .catch(err => {
+            statusMsg.innerHTML = '❌ Error: ' + err.message;
+            loader.style.display = 'none';
+            showToast('❌ Payment initiation failed', 'error');
+            resetPaymentButtons();
+        });
+    }
+
+    function resetPaymentButtons() {
+        isProcessingPayment = false;
+        const mpesaBtn = document.getElementById('mpesaPayBtn');
+        if (mpesaBtn) { mpesaBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Pay KSh ' + totalAmount.toLocaleString(); mpesaBtn.disabled = false; }
+        const waBtn = document.getElementById('whatsappOrderBtn');
+        if (waBtn) waBtn.disabled = false;
+    }
+
+    // ============================================================
+    // POLL M-PESA STATUS
+    // ============================================================
+    function pollMpesaStatus(checkoutId) {
+        if (mpesaStatusInterval) clearInterval(mpesaStatusInterval);
+        let attempts = 0;
+        const maxAttempts = 20;
+
+        mpesaStatusInterval = setInterval(() => {
+            attempts++;
+            const elapsed = Math.round((Date.now() - mpesaStartTime) / 1000);
+
+            if (attempts === 10 && !mpesaEscalated) {
+                mpesaEscalated = true;
+                document.getElementById('mpesaStatusMessage').innerHTML =
+                    '⏳ Still waiting for your M-Pesa prompt...<br><small style="color:#5a6d7a;">If no prompt appears, use the WhatsApp option below.</small>' +
+                    '<div style="margin-top:10px;">' +
+                    '<button onclick="orderViaWhatsApp()" style="background:#25D366;color:white;padding:10px 20px;border-radius:9999px;border:none;font-weight:700;cursor:pointer;font-size:0.85rem;">' +
+                    '<i class="fab fa-whatsapp"></i> Switch to WhatsApp Order' +
+                    '</button></div>';
+            }
+
+            fetch('/mpesa/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ checkout_request_id: checkoutId, elapsed: elapsed })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.status === 'completed') {
+                        clearInterval(mpesaStatusInterval);
+                        document.getElementById('mpesaStatusMessage').innerHTML = '✅ Payment successful!';
+                        document.getElementById('mpesaStatusLoader').style.display = 'none';
+                        showToast('✅ Payment completed successfully!', 'success');
+                        completeOrder('mpesa');
+                    } else if (data.status === 'cancelled') {
+                        clearInterval(mpesaStatusInterval);
+                        document.getElementById('mpesaStatusMessage').innerHTML = '❌ You cancelled the payment. <button onclick="retryMpesa()" style="margin-left:8px;text-decoration:underline;color:#0b2b1e;font-weight:700;">Retry</button>';
+                        document.getElementById('mpesaStatusLoader').style.display = 'none';
+                        resetPaymentButtons();
+                    } else if (data.status === 'expired') {
+                        clearInterval(mpesaStatusInterval);
+                        document.getElementById('mpesaStatusMessage').innerHTML = '❌ Transaction expired. <button onclick="retryMpesa()" style="margin-left:8px;text-decoration:underline;color:#0b2b1e;font-weight:700;">Retry</button>';
+                        document.getElementById('mpesaStatusLoader').style.display = 'none';
+                        resetPaymentButtons();
+                    } else if (data.status === 'unreachable') {
+                        clearInterval(mpesaStatusInterval);
+                        document.getElementById('mpesaStatusMessage').innerHTML = '📵 Could not reach your phone. Check signal and <button onclick="retryMpesa()" style="margin-left:8px;text-decoration:underline;color:#0b2b1e;font-weight:700;">Retry</button>';
+                        document.getElementById('mpesaStatusLoader').style.display = 'none';
+                        resetPaymentButtons();
+                    } else if (data.status === 'failed') {
+                        clearInterval(mpesaStatusInterval);
+                        document.getElementById('mpesaStatusMessage').innerHTML = '❌ ' + data.message + ' <button onclick="retryMpesa()" style="margin-left:8px;text-decoration:underline;color:#0b2b1e;font-weight:700;">Retry</button>';
+                        document.getElementById('mpesaStatusLoader').style.display = 'none';
+                        resetPaymentButtons();
+                    } else if (data.status === 'insufficient') {
+                        clearInterval(mpesaStatusInterval);
+                        document.getElementById('mpesaStatusMessage').innerHTML = '❌ Insufficient M-Pesa balance. <button onclick="retryMpesa()" style="margin-left:8px;text-decoration:underline;color:#0b2b1e;font-weight:700;">Retry</button>';
+                        document.getElementById('mpesaStatusLoader').style.display = 'none';
+                        resetPaymentButtons();
+                    } else if (data.status === 'wrong_pin') {
+                        clearInterval(mpesaStatusInterval);
+                        document.getElementById('mpesaStatusMessage').innerHTML = '❌ Wrong M-Pesa PIN. <button onclick="retryMpesa()" style="margin-left:8px;text-decoration:underline;color:#0b2b1e;font-weight:700;">Retry</button>';
+                        document.getElementById('mpesaStatusLoader').style.display = 'none';
+                        resetPaymentButtons();
+                    }
+                }
+
+                if (attempts >= maxAttempts) {
+                    clearInterval(mpesaStatusInterval);
+                    document.getElementById('mpesaStatusMessage').innerHTML =
+                        '📵 No M-Pesa prompt received?<br>' +
+                        '<small style="color:#5a6d7a;">Your SIM or network may not support STK push.</small>' +
+                        '<div style="margin-top:10px;">' +
+                        '<button onclick="orderViaWhatsApp()" style="background:#25D366;color:white;padding:10px 20px;border-radius:9999px;border:none;font-weight:700;cursor:pointer;font-size:0.85rem;">' +
+                        '<i class="fab fa-whatsapp"></i> Order via WhatsApp instead' +
+                        '</button>' +
+                        '<button onclick="retryMpesa()" style="margin-left:8px;background:transparent;border:2px solid #0b2b1e;color:#0b2b1e;padding:8px 18px;border-radius:9999px;font-weight:700;cursor:pointer;font-size:0.85rem;">' +
+                        '<i class="fas fa-redo"></i> Retry M-Pesa' +
+                        '</button></div>';
+                    document.getElementById('mpesaStatusLoader').style.display = 'none';
+                    resetPaymentButtons();
+                }
+            })
+            .catch(() => {});
+        }, 3000);
+    }
+
+    function retryMpesa() {
+        document.getElementById('mpesaStatus').style.display = 'none';
+        mpesaEscalated = false;
+        resetPaymentButtons();
+        payWithMpesa();
+    }
+
+    // ============================================================
+    // ORDER VIA WHATSAPP
+    // ============================================================
+    function orderViaWhatsApp() {
+        if (isProcessingPayment) return;
+        if (orderPlaced) return;
+        if (!validateCustomerData()) return;
+
+        const data = getCustomerData();
+        const customerName = data.first_name + ' ' + data.last_name;
+        const fullAddress = fulfillmentType === 'pickup'
+            ? '🏪 Pickup at Store — Rongai, Kenya'
+            : (data.address + ', ' + data.city + ', ' + data.country);
+
+        const cartItems = [];
+        document.querySelectorAll('.order-item').forEach(el => {
+            const nameEl = el.querySelector('.order-item-name');
+            const priceEl = el.querySelector('.order-item-price');
+            const qtyEl = el.querySelector('.order-item-quantity');
+            if (nameEl && priceEl) {
+                const price = parseFloat(priceEl.textContent.replace('KSh ', '').replace(/,/g, ''));
+                const qty = qtyEl ? parseInt(qtyEl.textContent.replace('×', '')) : 1;
+                cartItems.push({ name: nameEl.textContent.trim(), price: price, quantity: qty });
+            }
+        });
+
+        const trackingNumber = generateTrackingNumber();
+        const orderId = 'WA-' + Date.now().toString(36).toUpperCase();
+
+        const orderData = {
+            order_id: orderId,
+            tracking_number: trackingNumber,
+            items: cartItems,
+            subtotal: subtotal,
+            shipping: subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : shippingCost,
+            total: totalAmount,
+            payment_method: 'whatsapp',
+            status: 'pending',
+            source: 'whatsapp',
+            created_at: new Date().toISOString(),
+            customer_name: customerName,
+            customer_email: data.email,
+            customer_phone: data.phone,
+            customer_address: fullAddress,
+            delivery_notes: data.delivery_notes,
+            delivery_zone: data.delivery_zone,
+            distance_km: detectedDistance,
+            fulfillment_type: fulfillmentType
+        };
+
+        isProcessingPayment = true;
+
+        const waBtn = document.getElementById('whatsappOrderBtn');
+        const mpesaBtn = document.getElementById('mpesaPayBtn');
+
+        if (waBtn) { waBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; waBtn.disabled = true; }
+        if (mpesaBtn) mpesaBtn.disabled = true;
+
+        showToast('💬 Saving your order...', 'info');
+
+        fetch('/place-order-whatsapp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                orderPlaced = true;
+                isProcessingPayment = false;
+
+                document.getElementById('orderId').textContent = result.order_id || orderId;
+                document.getElementById('trackingNumber').textContent = trackingNumber;
+                document.getElementById('deliveryName').textContent = customerName;
+                document.getElementById('deliveryAddress').textContent = fullAddress;
+                document.getElementById('orderTypeMessage').innerHTML = '💬 Order saved! Complete payment in WhatsApp';
+
+                const notes = document.getElementById('deliveryNotesDisplay');
+                notes.textContent = data.delivery_notes ? '📝 ' + data.delivery_notes : 'No special instructions';
+
+                showToast('✅ Order saved! Opening WhatsApp...', 'success', 'Confirm your order in WhatsApp');
+
+                if (result.whatsapp_url) {
+                    window.location.href = result.whatsapp_url;
+                } else {
+                    goToStep(3);
+                    launchConfetti();
+                }
+            } else {
+                showToast('❌ ' + (result.message || 'Failed to save order'), 'error');
+                isProcessingPayment = false;
+                if (waBtn) { waBtn.innerHTML = '<i class="fab fa-whatsapp"></i> Order via WhatsApp'; waBtn.disabled = false; }
+                if (mpesaBtn) mpesaBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            showToast('❌ Something went wrong. Please try again.', 'error');
+            isProcessingPayment = false;
+            if (waBtn) { waBtn.innerHTML = '<i class="fab fa-whatsapp"></i> Order via WhatsApp'; waBtn.disabled = false; }
+            if (mpesaBtn) mpesaBtn.disabled = false;
+        });
+    }
+
+    // ============================================================
+    // COMPLETE M-PESA ORDER
+    // ============================================================
+    function completeOrder(method) {
+        if (orderPlaced) return;
+        orderPlaced = true;
+
+        const data = getCustomerData();
+        const customerName = data.first_name + ' ' + data.last_name;
+        const fullAddress = fulfillmentType === 'pickup'
+            ? '🏪 Pickup at Store — Rongai, Kenya'
+            : (data.address + ', ' + data.city + ', ' + data.country);
+
+        const cartItems = [];
+        document.querySelectorAll('.order-item').forEach(el => {
+            const nameEl = el.querySelector('.order-item-name');
+            const priceEl = el.querySelector('.order-item-price');
+            const qtyEl = el.querySelector('.order-item-quantity');
+            const imgEl = el.querySelector('.order-item-image img');
+            if (nameEl && priceEl) {
+                const price = parseFloat(priceEl.textContent.replace('KSh ', '').replace(/,/g, ''));
+                const qty = qtyEl ? parseInt(qtyEl.textContent.replace('×', '')) : 1;
+                cartItems.push({
+                    name: nameEl.textContent.trim(),
+                    price: price,
+                    quantity: qty,
+                    image: imgEl ? imgEl.src : ''
+                });
+            }
+        });
+
+        const trackingNumber = generateTrackingNumber();
+        const orderId = 'PP-' + Date.now().toString(36).toUpperCase();
+
+        const orderData = {
+            order_id: orderId,
+            tracking_number: trackingNumber,
+            items: cartItems,
+            subtotal: subtotal,
+            shipping: subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : shippingCost,
+            total: totalAmount,
+            payment_method: method,
+            status: 'processing',
+            source: 'web',
+            created_at: new Date().toISOString(),
+            customer_name: customerName,
+            customer_email: data.email,
+            customer_phone: data.phone,
+            customer_address: fullAddress,
+            delivery_notes: data.delivery_notes,
+            delivery_zone: data.delivery_zone,
+            distance_km: detectedDistance,
+            fulfillment_type: fulfillmentType,
+            customer: {
+                name: customerName,
+                email: data.email,
+                phone: data.phone,
+                address: fullAddress
+            }
+        };
+
+        fetch('/place-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                isProcessingPayment = false;
+
+                document.getElementById('orderId').textContent = result.order_id || orderId;
+                document.getElementById('trackingNumber').textContent = trackingNumber;
+                document.getElementById('deliveryName').textContent = customerName;
+                document.getElementById('deliveryAddress').textContent = fullAddress;
+                document.getElementById('orderTypeMessage').textContent = fulfillmentType === 'pickup'
+                    ? 'Your pickup order is confirmed — collect at our store'
+                    : 'Your order has been confirmed and is being processed';
+
+                const notes = document.getElementById('deliveryNotesDisplay');
+                notes.textContent = data.delivery_notes ? '📝 ' + data.delivery_notes : 'No special instructions';
+
+                goToStep(3);
+                launchConfetti();
+                showToast('🎉 Order placed successfully!', 'success', 'Order #' + (result.order_id || orderId));
+
+                if (result.whatsapp_url) {
+                    setTimeout(() => window.open(result.whatsapp_url, '_blank'), 1500);
+                }
+            } else {
+                orderPlaced = false;
+                showToast('❌ ' + (result.message || 'Failed to place order'), 'error');
+                resetPaymentButtons();
+            }
+        })
+        .catch(error => {
+            orderPlaced = false;
+            showToast('❌ Something went wrong. Please try again.', 'error');
+            resetPaymentButtons();
+        });
+    }
+
+    // ============================================================
+    // CONFETTI
+    // ============================================================
+    function launchConfetti() {
+        const container = document.getElementById('confettiContainer');
+        const colors = ['#0b2b1e', '#c7a86b', '#2563eb', '#f59e0b', '#10b981', '#8b5cf6', '#f43f5e', '#06b6d4'];
+        for (let i = 0; i < 120; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            piece.style.left = Math.random() * 100 + '%';
+            piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.width = (Math.random() * 10 + 4) + 'px';
+            piece.style.height = (Math.random() * 10 + 4) + 'px';
+            piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            piece.style.animationDuration = (Math.random() * 2.5 + 1.5) + 's';
+            piece.style.animationDelay = (Math.random() * 2.5) + 's';
+            container.appendChild(piece);
+            setTimeout(() => piece.remove(), 5000);
+        }
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(message, type = 'success', subMessage = '') {
+        const toast = document.getElementById('toast');
+        const msgEl = document.getElementById('toastMessage');
+        const subEl = document.getElementById('toastSubMessage');
+        const iconEl = document.getElementById('toastIcon');
+
+        msgEl.textContent = message;
+        subEl.textContent = subMessage || '';
+
+        const icons = {
+            success: 'fas fa-check-circle text-[#0b2b1e] text-xl',
+            error: 'fas fa-times-circle text-red-500 text-xl',
+            warning: 'fas fa-exclamation-triangle text-amber-500 text-xl',
+            info: 'fas fa-info-circle text-blue-500 text-xl'
+        };
+        iconEl.className = icons[type] || icons.success;
+
+        toast.classList.remove('hidden');
+        clearTimeout(window.toastTimeout);
+        window.toastTimeout = setTimeout(() => toast.classList.add('hidden'), 5000);
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const mpesaBtn = document.getElementById('mpesaPayBtn');
+        if (mpesaBtn) mpesaBtn.addEventListener('click', (e) => { e.preventDefault(); payWithMpesa(); });
+
+        const waBtn = document.getElementById('whatsappOrderBtn');
+        if (waBtn) waBtn.addEventListener('click', (e) => { e.preventDefault(); orderViaWhatsApp(); });
+
+        document.getElementById('summarySubtotal').textContent = 'KSh ' + subtotal.toLocaleString();
+        updateTotalsDisplay();
+
+        // Default to Delivery mode → run location detection
+        setTimeout(() => {
+            detectLocation();
+        }, 800);
+    });
+    </script>
+</body>
+</html>

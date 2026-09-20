@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PricePoint POS</title>
+    <link rel="manifest" href="/static/manifest.json" crossorigin="use-credentials">
+    <meta name="theme-color" content="#059669">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    
+    <script>
+        // ============================================================
+        // PWA ENTRY POINT - OFFLINE-FIRST
+        // ============================================================
+        
+        console.log('📱 PWA Entry Point');
+        console.log('📡 Network:', navigator.onLine ? '🟢 Online' : '🔴 Offline');
+        
+        // If online, go to the real POS
+        if (navigator.onLine) {
+            window.location.href = '/pos';
+        } else {
+            // Offline: Show the offline page or cached POS
+            const cached = localStorage.getItem('pos-cached-page');
+            if (cached) {
+                document.documentElement.innerHTML = cached;
+                // Re-run scripts
+                document.querySelectorAll('script').forEach(s => {
+                    const ns = document.createElement('script');
+                    ns.textContent = s.textContent;
+                    document.body.appendChild(ns);
+                });
+                console.log('✅ POS restored from cache!');
+            } else {
+                document.body.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;font-family:system-ui;padding:20px;">
+                        <div style="background:white;border-radius:20px;padding:40px;max-width:400px;text-align:center;">
+                            <div style="font-size:3rem;">📡</div>
+                            <h1 style="color:#0f172a;">Offline</h1>
+                            <p style="color:#64748b;">Please connect to the internet to load the POS.</p>
+                            <button onclick="location.reload()" style="padding:12px 32px;background:#059669;color:white;border:none;border-radius:9999px;cursor:pointer;">🔄 Retry</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Cache the page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (navigator.onLine) {
+                setTimeout(() => {
+                    const html = document.documentElement.outerHTML;
+                    localStorage.setItem('pos-cached-page', html);
+                    console.log('📦 Page cached');
+                }, 3000);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;">
+        <div style="background:white;border-radius:20px;padding:40px;text-align:center;">
+            <div style="font-size:3rem;">💰</div>
+            <h1 style="color:#0f172a;">PricePoint POS</h1>
+            <p style="color:#64748b;">Loading...</p>
+        </div>
+    </div>
+</body>
+</html>
