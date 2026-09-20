@@ -22,11 +22,11 @@ class Config:
     # Currently pointing to: tkotvyblutchsudpqqqe (TEST)
     SUPABASE_URL = os.environ.get(
         'NEXT_PUBLIC_SUPABASE_URL',
-        'https://tkotvyblutchsudpqqqe.supabase.co'
+        'https://aqfpbywhrqrzaiehupbj.supabase.co'
     )
     SUPABASE_KEY = os.environ.get(
         'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
-        'sb_publishable_NSVq3YS29H-U5vjhB6gC7A_uWFsezmy'
+        'sb_publishable_f5yyP2iTNjyklFLc4eM7jA_Lv7469z-'
     )
 
     SUPABASE_HEADERS = {
