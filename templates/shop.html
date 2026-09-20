@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ACACIAMART · Kenya's Online Supermarket</title>
-    <meta name="description" content="ACACIAMART Kenya — shop groceries online, fast delivery" />
+    <title>THEPENTAGON · Kenya's Online Supermarket</title>
+    <meta name="description" content="THEPENTAGON Kenya — shop groceries online, fast delivery" />
     <meta name="theme-color" content="#059669" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -15,7 +15,6 @@
            1. VARIABLES & RESET
            ============================================================ */
         :root {
-            /* Brand */
             --primary: #059669;
             --primary-dark: #047857;
             --primary-light: #10b981;
@@ -24,7 +23,6 @@
             --accent-dark: #d97706;
             --danger: #ef4444;
 
-            /* Neutrals */
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
@@ -36,7 +34,6 @@
             --gray-800: #1e293b;
             --gray-900: #0f172a;
 
-            /* Theme tokens */
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
             --bg-input: #f1f5f9;
@@ -46,7 +43,6 @@
             --border-color: #e2e8f0;
             --header-bg: rgba(255, 255, 255, 0.78);
 
-            /* Effects */
             --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.08);
             --radius: 12px;
@@ -248,7 +244,6 @@
         #mobileSearchBtn { display: flex; }
         @media (min-width: 900px) { #mobileSearchBtn { display: none !important; } }
 
-        /* Second header row */
         .header-row2 {
             border-top: 1px solid var(--border-color);
             padding: 8px 0;
@@ -319,7 +314,6 @@
         .cat-mega-item:hover { background: var(--primary-bg); color: var(--primary); }
         .cat-mega-item i { color: var(--primary); width: 16px; text-align: center; }
 
-        /* Mobile menu */
         #mobileMenu {
             position: absolute; top: 100%; left: 0; right: 0;
             max-height: 0; overflow: hidden; opacity: 0;
@@ -343,23 +337,29 @@
         #mobileToggle.open .icon-close { display: inline-block; }
 
         /* ============================================================
-           6. HERO
+           6. HERO — MODERN REDESIGN
            ============================================================ */
         .hero-carousel {
             position: relative;
-            min-height: 440px;
-            display: flex; align-items: center; justify-content: center;
+            min-height: 480px;
+            display: flex; align-items: center;
             overflow: hidden;
-            padding: 36px 20px;
+            padding: 40px 20px;
             background: var(--gray-900);
+            border-radius: 0 0 32px 32px;
         }
         .hero-slide {
             position: absolute; inset: 0;
             opacity: 0;
-            transition: opacity 1.1s ease;
+            transform: scale(1.08);
+            transition: opacity 1.2s ease, transform 6s ease;
             z-index: 0;
         }
-        .hero-slide.active { opacity: 1; z-index: 1; }
+        .hero-slide.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 1;
+        }
         .hero-slide .slide-img {
             position: absolute; inset: 0;
             width: 100%; height: 100%;
@@ -368,114 +368,164 @@
         .hero-slide .slide-overlay {
             position: absolute; inset: 0;
             background:
-                linear-gradient(180deg, rgba(4, 20, 15, 0.55) 0%, rgba(4, 20, 15, 0.35) 40%, rgba(4, 20, 15, 0.78) 100%),
-                linear-gradient(100deg, rgba(5, 150, 105, 0.55) 0%, rgba(4, 120, 87, 0.22) 45%, rgba(15, 23, 42, 0.15) 100%);
+                radial-gradient(circle at 20% 50%, rgba(5, 150, 105, 0.45) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(4, 20, 15, 0.35) 0%, rgba(4, 20, 15, 0.65) 60%, rgba(4, 20, 15, 0.85) 100%);
         }
+
         .hero-content {
             position: relative; z-index: 5;
-            text-align: center;
-            max-width: 680px;
-            margin: 0 auto;
+            max-width: 640px;
+            margin: 0;
+            padding-left: 20px;
+            text-align: left;
         }
+        @media (max-width: 768px) {
+            .hero-content { padding-left: 0; text-align: center; margin: 0 auto; }
+        }
+
         .hero-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(255, 255, 255, 0.14);
-            backdrop-filter: blur(10px);
-            padding: 6px 16px; border-radius: 9999px;
-            font-weight: 700; font-size: 0.72rem;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.72rem;
             color: #a7f3d0;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            margin-bottom: 1rem;
+            border: 1px solid rgba(167, 243, 208, 0.25);
+            margin-bottom: 1.2rem;
+            letter-spacing: 0.03em;
             animation: slideUp 0.6s ease;
         }
         .hero-badge i { color: var(--accent); }
+
         .hero-title {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 2.7rem; font-weight: 800;
-            line-height: 1.1; color: white;
-            margin-bottom: 0.55rem;
-            text-shadow: 0 4px 26px rgba(0, 0, 0, 0.35);
-            letter-spacing: -0.8px;
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.05;
+            color: white;
+            margin-bottom: 1rem;
+            letter-spacing: -1.2px;
+            text-shadow: 0 6px 32px rgba(0, 0, 0, 0.4);
         }
         .hero-title .highlight {
-            background: linear-gradient(135deg, #6ee7b7, #34d399);
+            background: linear-gradient(135deg, #6ee7b7 0%, #34d399 50%, #fbbf24 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            display: inline-block;
         }
         .hero-subtitle {
-            font-size: 1.02rem;
-            color: rgba(255, 255, 255, 0.92);
-            line-height: 1.6;
-            margin-bottom: 1.3rem;
-            max-width: 480px;
-            margin-left: auto; margin-right: auto;
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.65;
+            margin-bottom: 1.8rem;
+            max-width: 500px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 28px;
         }
         .hero-btn-primary {
-            background: white; color: var(--gray-900);
-            padding: 13px 30px; border-radius: 9999px;
-            font-weight: 800; font-size: 0.9rem;
-            transition: all .3s;
-            display: inline-flex; align-items: center; gap: 8px;
-            text-decoration: none;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-        }
-        .hero-btn-primary:hover { transform: translateY(-3px) scale(1.03); }
-        .hero-btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            border: 1.5px solid rgba(255, 255, 255, 0.35);
-            color: white; padding: 13px 26px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 14px 32px;
             border-radius: 9999px;
-            font-weight: 700; font-size: 0.85rem;
-            transition: all .3s;
-            display: inline-flex; align-items: center; gap: 8px;
+            font-weight: 800;
+            font-size: 0.92rem;
+            transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex; align-items: center; gap: 10px;
+            text-decoration: none;
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+            border: 2px solid transparent;
+        }
+        .hero-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 42px rgba(16, 185, 129, 0.5);
+            background: linear-gradient(135deg, #34d399, #10b981);
+        }
+        .hero-btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: all .3s ease;
+            display: inline-flex; align-items: center; gap: 10px;
             text-decoration: none;
         }
-        .hero-btn-secondary:hover { background: rgba(255, 255, 255, 0.18); }
+        .hero-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
         .hero-features {
-            display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 20px; margin-top: 24px;
+            display: flex; flex-wrap: wrap; gap: 20px;
         }
         .hero-features span {
-            color: rgba(255, 255, 255, 0.82);
-            font-size: 0.8rem;
-            display: flex; align-items: center; gap: 6px;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.78rem;
+            display: flex; align-items: center; gap: 7px;
             font-weight: 500;
         }
-        .hero-features span i { color: var(--accent); }
+        .hero-features span i {
+            color: #6ee7b7;
+            font-size: 0.9rem;
+        }
 
         .hero-arrow {
             position: absolute; top: 50%;
             transform: translateY(-50%);
             z-index: 10;
-            width: 44px; height: 44px;
+            width: 48px; height: 48px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255, 255, 255, 0.22);
             color: white;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            transition: all .25s ease;
+            transition: all .3s ease;
         }
-        .hero-arrow:hover { background: rgba(255, 255, 255, 0.25); }
-        .hero-arrow.prev { left: 16px; }
-        .hero-arrow.next { right: 16px; }
+        .hero-arrow:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-50%) scale(1.08);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .hero-arrow.prev { left: 24px; }
+        .hero-arrow.next { right: 24px; }
         @media (max-width: 640px) { .hero-arrow { display: none; } }
 
         .hero-dots {
-            position: absolute; bottom: 20px;
-            left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 28px;
+            right: 40px;
             z-index: 10;
-            display: flex; gap: 8px;
+            display: flex; gap: 10px;
+        }
+        @media (max-width: 768px) {
+            .hero-dots { left: 50%; right: auto; transform: translateX(-50%); }
         }
         .hero-dot {
-            width: 8px; height: 8px; border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.4);
-            cursor: pointer; transition: all .3s ease;
+            width: 10px; height: 10px; border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            transition: all .4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .hero-dot.active { width: 24px; background: var(--accent); }
+        .hero-dot.active {
+            width: 32px;
+            background: linear-gradient(135deg, #10b981, #fbbf24);
+            border-color: transparent;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+        }
 
         /* ============================================================
            7. SECTION HEADINGS
@@ -542,101 +592,173 @@
         .home-category-tile.view-all .tile-name { color: var(--primary); }
 
         /* ============================================================
-           9. HOME — PRODUCT CAROUSELS
+           9. HOME — PRODUCT CAROUSELS (REDESIGNED)
            ============================================================ */
-        .carousel-section { margin-bottom: 34px; }
+        .carousel-section { margin-bottom: 44px; }
+
         .carousel-header {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 18px;
+            padding-left: 4px;
         }
         .carousel-header h3 {
-            font-size: 1.05rem; font-weight: 800;
+            font-size: 1.15rem;
+            font-weight: 800;
             color: var(--text-primary);
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 10px;
+            letter-spacing: -0.3px;
         }
-        .carousel-header h3 i { color: var(--primary); }
+        .carousel-header h3 i {
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            width: 32px; height: 32px;
+            border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.28);
+        }
         .see-more-link {
-            font-size: 0.76rem; font-weight: 700;
-            color: var(--primary); text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
             cursor: pointer;
-            display: inline-flex; align-items: center; gap: 4px;
-            transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            background: var(--primary-bg);
+            transition: all .3s ease;
             white-space: nowrap;
+            border: 1px solid transparent;
         }
-        .see-more-link:hover { gap: 8px; color: var(--primary-dark); }
+        .see-more-link:hover {
+            background: var(--primary);
+            color: white;
+            gap: 10px;
+            border-color: var(--primary);
+        }
 
         .carousel-track {
-            display: flex; gap: 12px;
+            display: flex;
+            gap: 16px;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
-            padding-bottom: 6px;
+            padding: 8px 4px 16px;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
         }
         .carousel-track::-webkit-scrollbar { display: none; }
 
         .carousel-card {
-            flex: 0 0 152px;
+            flex: 0 0 180px;
             scroll-snap-align: start;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 10px;
+            border-radius: 18px;
+            padding: 14px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all .35s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            overflow: hidden;
         }
-        @media (min-width: 640px) { .carousel-card { flex-basis: 172px; } }
+        @media (min-width: 640px) { .carousel-card { flex-basis: 200px; } }
+
+        .carousel-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity .3s;
+        }
         .carousel-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
             border-color: var(--primary);
         }
+        .carousel-card:hover::before { opacity: 1; }
+
         .carousel-card .c-badge {
-            position: absolute; top: 8px; left: 8px;
-            background: var(--accent); color: white;
-            font-size: 0.55rem; font-weight: 800;
-            padding: 2px 9px; border-radius: 9999px;
+            position: absolute;
+            top: 12px; left: 12px;
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            color: white;
+            font-size: 0.55rem;
+            font-weight: 800;
+            padding: 3px 11px;
+            border-radius: 9999px;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
             z-index: 2;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
         }
-        .carousel-card .c-badge.best-seller { background: var(--primary); }
-        .carousel-card .c-badge.new { background: #059669; }
+        .carousel-card .c-badge.best-seller {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.35);
+        }
+        .carousel-card .c-badge.new {
+            background: linear-gradient(135deg, #059669, #10b981);
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.35);
+        }
+
         .carousel-card .c-image {
-            width: 100%; height: 110px;
+            width: 100%;
+            height: 130px;
             object-fit: contain;
-            background: var(--bg-input);
-            border-radius: 8px;
-            padding: 6px;
-            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--bg-input), rgba(5, 150, 105, 0.04));
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 12px;
+            transition: transform .4s ease;
         }
+        .carousel-card:hover .c-image { transform: scale(1.05); }
+
         .carousel-card .c-name {
-            font-weight: 600; font-size: 0.74rem;
-            color: var(--text-primary); line-height: 1.3;
-            min-height: 32px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            line-height: 1.35;
+            min-height: 34px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            letter-spacing: -0.2px;
         }
         .carousel-card .c-price {
-            font-weight: 800; font-size: 0.9rem;
-            color: var(--primary); margin-top: 4px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--primary);
+            margin-top: 6px;
+            letter-spacing: -0.4px;
         }
-        .carousel-card .c-rating { color: var(--accent); font-size: 0.62rem; margin-top: 2px; }
+        .carousel-card .c-rating {
+            color: var(--accent);
+            font-size: 0.65rem;
+            margin-top: 3px;
+            display: flex; align-items: center; gap: 2px;
+        }
         .carousel-card .c-add {
-            margin-top: 8px;
+            margin-top: 10px;
             width: 100%;
             background: var(--bg-input);
-            border: none;
+            border: 1.5px solid transparent;
             color: var(--text-primary);
-            font-weight: 700; font-size: 0.68rem;
-            padding: 7px; border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.72rem;
+            padding: 9px;
+            border-radius: 9999px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all .3s ease;
             letter-spacing: 0.02em;
         }
-        .carousel-card .c-add:hover:not(:disabled) { background: var(--primary); color: white; }
+        .carousel-card .c-add:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3);
+        }
         .carousel-card .c-add:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* ============================================================
@@ -1047,21 +1169,25 @@
            15. RESPONSIVE
            ============================================================ */
         @media (max-width: 768px) {
-            .hero-carousel { min-height: 400px; padding: 26px 16px; }
-            .hero-title { font-size: 1.95rem; }
-            .hero-subtitle { font-size: 0.88rem; }
+            .hero-carousel { min-height: 420px; padding: 30px 16px; border-radius: 0 0 24px 24px; }
+            .hero-title { font-size: 2.2rem; }
+            .hero-subtitle { font-size: 0.9rem; }
             .product-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
             .product-card .product-image { height: 140px; }
             .map-container iframe { height: 240px; }
+            .carousel-card { flex-basis: 160px; }
+            .carousel-card .c-image { height: 110px; }
         }
         @media (max-width: 480px) {
-            .hero-carousel { min-height: 360px; padding: 20px 12px; }
-            .hero-title { font-size: 1.55rem; }
+            .hero-carousel { min-height: 380px; padding: 24px 12px; }
+            .hero-title { font-size: 1.8rem; letter-spacing: -0.6px; }
+            .hero-buttons { justify-content: center; }
             .hero-btn-secondary { display: none; }
+            .hero-features { justify-content: center; }
             .product-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
             .product-card .product-image { height: 110px; padding: 6px; }
             .product-card { padding: 8px; border-radius: 10px; }
-            .carousel-card { flex-basis: 132px; }
+            .carousel-card { flex-basis: 150px; padding: 12px; }
             .footer-grid { grid-template-columns: 1fr; text-align: center; }
             .footer-grid > div { display: flex; flex-direction: column; align-items: center; }
             .footer-newsletter-form { max-width: 100%; margin: 0 auto; }
@@ -1086,9 +1212,9 @@
      ============================================================ -->
 <header class="app-header" id="mainHeader" role="banner">
     <div class="container-full header-row1 flex items-center justify-between gap-3 relative">
-        <a href="javascript:void(0)" onclick="showHome()" class="flex items-center gap-2" aria-label="ACACIAMART Home">
-            <span class="brand-icon-wrap"><i class="fas fa-shopping-basket"></i></span>
-            <span class="brand-text">ACACIA<span class="highlight">MART</span></span>
+        <a href="javascript:void(0)" onclick="showHome()" class="flex items-center gap-2" aria-label="THEPENTAGON Home">
+            <span class="brand-icon-wrap"><i class="fas fa-shield-alt"></i></span>
+            <span class="brand-text">THE<span class="highlight">PENTAGON</span></span>
             <span class="brand-tag">KE</span>
         </a>
 
@@ -1142,7 +1268,7 @@
      ============================================================ -->
 <div id="homeView">
 
-    <!-- Hero carousel -->
+    <!-- Hero carousel — MODERN REDESIGN -->
     <section class="hero-carousel" aria-label="Hero banner" id="heroCarousel">
         <div class="hero-slide active">
             <img class="slide-img" src="https://images.unsplash.com/photo-1583258292688-d0213dc5a3a7?w=1800&h=900&fit=crop&auto=format" alt="Supermarket aisle" />
@@ -1164,19 +1290,33 @@
         <button class="hero-arrow prev" onclick="heroPrev()" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
         <button class="hero-arrow next" onclick="heroNext()" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
 
-        <div class="hero-content">
-            <div class="hero-badge"><i class="fas fa-store"></i> Kenya's Online Supermarket</div>
-            <h1 class="hero-title">Fresh Products,<br><span class="highlight">Delivered Daily.</span></h1>
-            <p class="hero-subtitle">Shop bread, juice, snacks, beverages, and all your supermarket essentials at the best prices.</p>
-            <div class="flex flex-wrap justify-center gap-3">
-                <a href="javascript:void(0)" class="hero-btn-primary" onclick="showShop('all')"><i class="fas fa-bolt"></i> Start Shopping</a>
-                <a href="javascript:void(0)" class="hero-btn-secondary" onclick="scrollToId('location')"><i class="fas fa-map-marker-alt"></i> Find a Store</a>
-            </div>
-            <div class="hero-features">
-                <span><i class="fas fa-truck"></i> Same-Day Nairobi</span>
-                <span><i class="fas fa-credit-card"></i> Secure Payment</span>
-                <span><i class="fas fa-shield-alt"></i> Buyer Protection</span>
-                <span><i class="fas fa-undo"></i> Easy Returns</span>
+        <div class="container-full" style="position:relative;z-index:5;">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-bolt"></i> Kenya's Online Supermarket
+                </div>
+                <h1 class="hero-title">
+                    Fresh.<br>
+                    <span class="highlight">Delivered Daily.</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Bread, juice, snacks, beverages, and everyday essentials — 
+                    all your supermarket favourites at the best prices.
+                </p>
+                <div class="hero-buttons">
+                    <a href="javascript:void(0)" class="hero-btn-primary" onclick="showShop('all')">
+                        <i class="fas fa-shopping-bag"></i> Start Shopping
+                    </a>
+                    <a href="javascript:void(0)" class="hero-btn-secondary" onclick="scrollToId('location')">
+                        <i class="fas fa-map-marker-alt"></i> Find a Store
+                    </a>
+                </div>
+                <div class="hero-features">
+                    <span><i class="fas fa-truck"></i> Same-Day Nairobi</span>
+                    <span><i class="fas fa-credit-card"></i> Secure Payment</span>
+                    <span><i class="fas fa-shield-alt"></i> Buyer Protection</span>
+                    <span><i class="fas fa-undo"></i> Easy Returns</span>
+                </div>
             </div>
         </div>
 
@@ -1344,7 +1484,7 @@
                 <div class="map-container">
                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d255282.35853742383!2d36.68219671385957!3d-1.3028611!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d49a7%3A0xf7cf0254b297924c!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2s!4v1700000000000"
                             allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                            title="ACACIAMART Store Location"></iframe>
+                            title="THEPENTAGON Store Location"></iframe>
                 </div>
             </div>
             <div style="display:flex; flex-direction:column; gap:14px;">
@@ -1371,7 +1511,7 @@
 <section id="about" class="why-us-section" aria-label="Why choose us">
     <div class="container-full">
         <div style="text-align:center; margin-bottom:20px;">
-            <h2 class="text-primary" style="font-size:1.15rem; font-weight:800;">Why ACACIAMART?</h2>
+            <h2 class="text-primary" style="font-size:1.15rem; font-weight:800;">Why THEPENTAGON?</h2>
             <p class="text-muted" style="font-size:0.75rem;">Kenya's trusted online supermarket</p>
         </div>
         <div class="why-us-grid">
@@ -1407,8 +1547,8 @@
         <div class="footer-grid">
             <div>
                 <h3 style="color:white; font-size:1.15rem; display:flex; align-items:center; gap:8px;">
-                    <span class="brand-icon-wrap" style="animation:none;"><i class="fas fa-shopping-basket"></i></span>
-                    ACACIA<span class="text-primary">MART</span>
+                    <span class="brand-icon-wrap" style="animation:none;"><i class="fas fa-shield-alt"></i></span>
+                    THE<span class="text-primary">PENTAGON</span>
                 </h3>
                 <p style="max-width:280px; line-height:1.6; margin-top:10px; font-size:0.75rem;">
                     Your trusted online supermarket in Kenya — fresh groceries, everyday essentials, and unbeatable prices, delivered fast.
@@ -1455,7 +1595,7 @@
         </div>
         <div class="footer-divider"></div>
         <div class="footer-bottom" style="font-size:0.75rem; color:rgba(255,255,255,0.45);">
-            <p>© 2026 <span style="color:white; font-weight:500;">ACACIAMART Kenya</span>. All rights reserved.</p>
+            <p>© 2026 <span style="color:white; font-weight:500;">THEPENTAGON Kenya</span>. All rights reserved.</p>
             <div style="display:flex; gap:16px;">
                 <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Service</a>
@@ -1477,9 +1617,6 @@
      SCRIPTS
      ============================================================ -->
 <script>
-    /* ============================================================
-       DATA FROM BACKEND
-       ============================================================ */
     const CATEGORY_INFO = {
         {% for category, info in categories.items() %}
         "{{ category }}": { icon: {{ info.icon|tojson }}, count: {{ info.count }} }{% if not loop.last %},{% endif %}
@@ -1532,7 +1669,7 @@
     function heroNext() { heroIndex = (heroIndex + 1) % heroSlides.length; heroRender(); resetHeroTimer(); }
     function heroPrev() { heroIndex = (heroIndex - 1 + heroSlides.length) % heroSlides.length; heroRender(); resetHeroTimer(); }
     function heroGoTo(i) { heroIndex = i; heroRender(); resetHeroTimer(); }
-    function resetHeroTimer() { clearInterval(heroTimer); heroTimer = setInterval(heroNext, 5500); }
+    function resetHeroTimer() { clearInterval(heroTimer); heroTimer = setInterval(heroNext, 6000); }
 
     const heroCarouselEl = document.getElementById('heroCarousel');
     if (heroCarouselEl) {
@@ -1606,126 +1743,125 @@
     /* ============================================================
        CATEGORY IMAGES
        ============================================================ */
-const CATEGORY_IMAGE_MAP = [
-    [['beverage', 'drink', 'juice', 'soda'],
-     'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop&auto=format'],
+    const CATEGORY_IMAGE_MAP = [
+        [['beverage', 'drink', 'juice', 'soda'],
+         'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop&auto=format'],
 
-    [['snack', 'chip', 'biscuit', 'crisp'],
-     'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400&h=300&fit=crop&auto=format'],
+        [['snack', 'chip', 'biscuit', 'crisp'],
+         'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400&h=300&fit=crop&auto=format'],
 
-    [['fresh', 'fruit', 'vegetable', 'produce'],
-     'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&h=300&fit=crop&auto=format'],
+        [['fresh', 'fruit', 'vegetable', 'produce'],
+         'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&h=300&fit=crop&auto=format'],
 
-    [['dairy', 'milk', 'cheese', 'yoghurt', 'yogurt'],
-     'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=300&fit=crop&auto=format'],
+        [['dairy', 'milk', 'cheese', 'yoghurt', 'yogurt'],
+         'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=300&fit=crop&auto=format'],
 
-    [['bakery', 'bread', 'cake'],
-     'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&auto=format'],
+        [['bakery', 'bread', 'cake'],
+         'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&auto=format'],
 
-    [['meat', 'butchery', 'chicken', 'beef', 'fish'],
-     'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400&h=300&fit=crop&auto=format'],
+        [['meat', 'butchery', 'chicken', 'beef', 'fish'],
+         'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400&h=300&fit=crop&auto=format'],
 
-    [['household', 'clean', 'homecare', 'laundry', 'detergent'],
-     'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&h=300&fit=crop&auto=format'],
+        [['household', 'clean', 'homecare', 'laundry', 'detergent'],
+         'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&h=300&fit=crop&auto=format'],
 
-    [['health', 'beauty', 'personal care', 'cosmetic'],
-     'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop&auto=format'],
+        [['health', 'beauty', 'personal care', 'cosmetic'],
+         'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop&auto=format'],
 
-    [['body care', 'lotion', 'skin care', 'vaseline', 'body lotion'],
-     'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=300&fit=crop&auto=format'],
+        [['body care', 'lotion', 'skin care', 'vaseline', 'body lotion'],
+         'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=300&fit=crop&auto=format'],
 
-    [['baby diaper', 'diaper', 'diapers', 'pampers', 'huggies'],
-     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDzFYTiMuWffCwy_MikRQH8mrEG48KF-mC-YRKQnw6Nw&s=10'],
+        [['baby diaper', 'diaper', 'diapers', 'pampers', 'huggies'],
+         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDzFYTiMuWffCwy_MikRQH8mrEG48KF-mC-YRKQnw6Nw&s=10'],
 
-    [['baby wipe', 'baby wipes', 'wipes'],
-     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR16pUvQhHVOFrv4vdITxM_hTSlv0Ys_-gn0DCV7qcFUA&s=10'],
+        [['baby wipe', 'baby wipes', 'wipes'],
+         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR16pUvQhHVOFrv4vdITxM_hTSlv0Ys_-gn0DCV7qcFUA&s=10'],
 
-    [['baby', 'kid', 'infant', 'child'],
-     'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=400&h=300&fit=crop&auto=format'],
+        [['baby', 'kid', 'infant', 'child'],
+         'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=400&h=300&fit=crop&auto=format'],
 
-    [['period', 'pads', 'sanitary', 'feminine'],
-     'https://images.unsplash.com/photo-1584451428414-f1e6e3c8dd8c?w=400&h=300&fit=crop&auto=format'],
+        [['period', 'pads', 'sanitary', 'feminine'],
+         'https://images.unsplash.com/photo-1584451428414-f1e6e3c8dd8c?w=400&h=300&fit=crop&auto=format'],
 
-    [['frozen'],
-     'https://images.unsplash.com/photo-1584362917165-526a968579e8?w=400&h=300&fit=crop&auto=format'],
+        [['frozen'],
+         'https://images.unsplash.com/photo-1584362917165-526a968579e8?w=400&h=300&fit=crop&auto=format'],
 
-    [['grain', 'cereal', 'rice', 'flour', 'cupboard', 'maize', 'unga'],
-     'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop&auto=format'],
+        [['grain', 'cereal', 'rice', 'flour', 'cupboard', 'maize', 'unga'],
+         'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop&auto=format'],
 
-    [['electronic', 'appliance'],
-     'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=300&fit=crop&auto=format'],
+        [['electronic', 'appliance'],
+         'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=300&fit=crop&auto=format'],
 
-    [['stationery', 'office', 'school'],
-     'https://images.unsplash.com/photo-1568205612837-017257d2310a?w=400&h=300&fit=crop&auto=format'],
+        [['stationery', 'office', 'school'],
+         'https://images.unsplash.com/photo-1568205612837-017257d2310a?w=400&h=300&fit=crop&auto=format'],
 
-    [['liquor', 'wine', 'beer', 'spirit', 'alcohol'],
-     'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&h=300&fit=crop&auto=format'],
+        [['liquor', 'wine', 'beer', 'spirit', 'alcohol'],
+         'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=400&h=300&fit=crop&auto=format'],
 
-    [['spice', 'seasoning'],
-     'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop&auto=format'],
+        [['spice', 'seasoning'],
+         'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&h=300&fit=crop&auto=format'],
 
-    [['soap', 'bar soap'],
-     'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=400&h=300&fit=crop&auto=format'],
+        [['soap', 'bar soap'],
+         'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=400&h=300&fit=crop&auto=format'],
 
-    [['toothpaste', 'toothbrush', 'oral'],
-     'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&h=300&fit=crop&auto=format'],
+        [['toothpaste', 'toothbrush', 'oral'],
+         'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&h=300&fit=crop&auto=format'],
 
-    [['tea', 'coffee', 'hot drink'],
-     'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format'],
+        [['tea', 'coffee', 'hot drink'],
+         'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format'],
 
-    [['hair care', 'shampoo', 'conditioner'],
-     'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&h=300&fit=crop&auto=format'],
+        [['hair care', 'shampoo', 'conditioner'],
+         'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&h=300&fit=crop&auto=format'],
 
-    [['fabric softener', 'comfort', 'downy'],
-     'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&h=300&fit=crop&auto=format'],
+        [['fabric softener', 'comfort', 'downy'],
+         'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&h=300&fit=crop&auto=format'],
 
-    [['salt'],
-     'https://images.unsplash.com/photo-1518110925495-b37eccc2c6e1?w=400&h=300&fit=crop&auto=format'],
+        [['salt'],
+         'https://images.unsplash.com/photo-1518110925495-b37eccc2c6e1?w=400&h=300&fit=crop&auto=format'],
 
-    [['sugar'],
-     'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?w=400&h=300&fit=crop&auto=format'],
+        [['sugar'],
+         'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?w=400&h=300&fit=crop&auto=format'],
 
-    [['cooking oil', 'cooking fat', 'margarine'],
-     'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=300&fit=crop&auto=format'],
+        [['cooking oil', 'cooking fat', 'margarine'],
+         'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=300&fit=crop&auto=format'],
 
-    [['noodle', 'pasta', 'macaroni', 'spaghetti'],
-     'https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=400&h=300&fit=crop&auto=format'],
+        [['noodle', 'pasta', 'macaroni', 'spaghetti'],
+         'https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=400&h=300&fit=crop&auto=format'],
 
-    [['chocolate', 'sweet', 'candy'],
-     'https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&h=300&fit=crop&auto=format'],
+        [['chocolate', 'sweet', 'candy'],
+         'https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&h=300&fit=crop&auto=format'],
 
-    [['jam', 'peanut butter', 'spread'],
-     'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop&auto=format'],
+        [['jam', 'peanut butter', 'spread'],
+         'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop&auto=format'],
 
-    [['honey'],
-     'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop&auto=format'],
+        [['honey'],
+         'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop&auto=format'],
 
-    [['legume', 'bean', 'lentil', 'pea'],
-     'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400&h=300&fit=crop&auto=format'],
+        [['legume', 'bean', 'lentil', 'pea'],
+         'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400&h=300&fit=crop&auto=format'],
 
-    [['cereal', 'cornflake', 'oats'],
-     'https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=400&h=300&fit=crop&auto=format'],
+        [['cereal', 'cornflake', 'oats'],
+         'https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=400&h=300&fit=crop&auto=format'],
 
-    [['deodorant'],
-     'https://images.unsplash.com/photo-1610397648930-477b8c7f0943?w=400&h=300&fit=crop&auto=format'],
+        [['deodorant'],
+         'https://images.unsplash.com/photo-1610397648930-477b8c7f0943?w=400&h=300&fit=crop&auto=format'],
 
-    [['shoe polish', 'leather care'],
-     'https://images.unsplash.com/photo-1449505278894-297fdb3edbc1?w=400&h=300&fit=crop&auto=format'],
+        [['shoe polish', 'leather care'],
+         'https://images.unsplash.com/photo-1449505278894-297fdb3edbc1?w=400&h=300&fit=crop&auto=format'],
 
-    [['kitchenware', 'utensil', 'pot', 'pan'],
-     'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=400&h=300&fit=crop&auto=format'],
+        [['kitchenware', 'utensil', 'pot', 'pan'],
+         'https://images.unsplash.com/photo-1556909212-d5b604d0c90d?w=400&h=300&fit=crop&auto=format'],
 
-  
+        [['sauce', 'ketchup', 'mayonnaise'],
+         'https://images.unsplash.com/photo-1472476443507-c7a5948772fc?w=400&h=300&fit=crop&auto=format'],
 
-    [['sauce', 'ketchup', 'mayonnaise'],
-     'https://images.unsplash.com/photo-1472476443507-c7a5948772fc?w=400&h=300&fit=crop&auto=format'],
+        [['flour', 'unga', 'maize flour'],
+         'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&auto=format'],
 
-    [['flour', 'unga', 'maize flour'],
-     'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&auto=format'],
+        [['rice'],
+         'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop&auto=format']
+    ];
 
-    [['rice'],
-     'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop&auto=format']
-];
     function getCategoryImage(category) {
         const lower = category.toLowerCase();
         for (const [keywords, url] of CATEGORY_IMAGE_MAP) {
@@ -1995,7 +2131,7 @@ const CATEGORY_IMAGE_MAP = [
             .then(data => {
                 document.getElementById('cartCount').textContent = data.count || 0;
             })
-            .catch(() => { /* keep server-rendered value */ });
+            .catch(() => {});
     }
 
     function addToCart(itemId) {
@@ -2072,6 +2208,19 @@ const CATEGORY_IMAGE_MAP = [
     window.addEventListener('scroll', () => {
         document.getElementById('mainHeader').classList.toggle('scrolled', window.scrollY > 10);
     });
+
+    /* ============================================================
+       HORIZONTAL WHEEL SCROLL ON CAROUSELS
+       ============================================================ */
+    document.addEventListener('wheel', function(e) {
+        const track = e.target.closest('.carousel-track');
+        if (track && !e.shiftKey) {
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                track.scrollLeft += e.deltaY;
+                e.preventDefault();
+            }
+        }
+    }, { passive: false });
 
     /* ============================================================
        INIT
