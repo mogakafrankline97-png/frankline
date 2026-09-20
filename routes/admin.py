@@ -16,18 +16,45 @@ from werkzeug.utils import secure_filename
 
 from config import Config
 from models.user import User
-from utils.data import (
-    get_cart,
-    get_sales_analytics,
-    load_bundles,
-    load_orders,
-    load_products,
-    order_revenue_value,
-    update_product_stock,
-)
+from utils.data import get_cart, get_sales_analytics, load_bundles, load_orders, load_products, update_product_stock
 from utils.storage import load_json_data, save_json_data
 
 admin_bp = Blueprint('admin', __name__)
+def order_revenue(order):
+    """Return product revenue only; delivery charges are not revenue."""
+    items = order.get('items', []) or []
+    if isinstance(items, str):
+        try:
+            items = json.loads(items)
+        except (TypeError, ValueError):
+            items = []
+
+    item_revenue = 0
+    has_items = False
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        try:
+            quantity = float(item.get('quantity', 1) or 1)
+            price = float(item.get('price', 0) or 0)
+        except (TypeError, ValueError):
+            continue
+        item_revenue += price * quantity
+        has_items = True
+
+    if has_items:
+        return item_revenue
+
+    try:
+        subtotal = float(order.get('subtotal', 0) or 0)
+        discount = float(order.get('discount', 0) or 0)
+        if subtotal or discount:
+            return max(0, subtotal - discount)
+        total = float(order.get('total', order.get('total_charged', 0)) or 0)
+        shipping = float(order.get('shipping', 0) or 0)
+        return max(0, total - shipping)
+    except (TypeError, ValueError):
+        return 0
 
 # ============================================================
 # DETECT VERCEL ENVIRONMENT
@@ -482,7 +509,15 @@ def api_orders_list():
         
         all_orders = []
         if response.status_code == 200:
-            all_orders = response.json()
+            raw_orders = response.json()
+            seen_order_ids = set()
+            for order in raw_orders:
+                order_id = str(order.get('order_id') or order.get('id') or '')
+                if order_id and order_id in seen_order_ids:
+                    continue
+                if order_id:
+                    seen_order_ids.add(order_id)
+                all_orders.append(order)
             print(f"📋 Found {len(all_orders)} orders from Supabase")
         else:
             # Fallback to local cache
@@ -922,14 +957,14 @@ def admin_dashboard():
                     'total_spent': 0
                 }
             customer_dict[name]['orders'] += 1
-            customer_dict[name]['total_spent'] += order.get('total', 0)
+            customer_dict[name]['total_spent'] += order_revenue(order)
 
         customers = list(customer_dict.values())
         customers.sort(key=lambda x: x['orders'], reverse=True)
         total_customers = len(customers)
 
         total_orders = len([o for o in all_orders if o.get('status') != 'cancelled'])
-        total_revenue = sum(order_revenue_value(o) for o in all_orders if o.get('status') != 'cancelled')
+        total_revenue = sum(order_revenue(o) for o in all_orders if o.get('status') != 'cancelled')
         pending_orders = len([o for o in all_orders if o.get('status') == 'pending'])
         
         low_stock_items = 0
@@ -968,7 +1003,7 @@ def admin_dashboard():
             last_day_last_month = datetime(today.year, today.month, 1).date() - timedelta(days=1)
 
         for order in all_orders:
-            total = order_revenue_value(order)
+            total = order_revenue(order)
 
             if order.get('status') == 'cancelled':
                 continue
@@ -2262,45 +2297,6 @@ def api_add_category():
         print(f"❌ Error adding category: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@admin_bp.route('/admin/api/categories/<path:category_name>', methods=['DELETE'])
-@admin_required
-def api_delete_category(category_name):
-    """Delete an unused locally saved category."""
-    try:
-        category_name = str(category_name).strip()
-        if not category_name:
-            return jsonify({'success': False, 'message': 'Category name required'}), 400
-
-        response = requests.get(
-            f"{Config.SUPABASE_URL}/rest/v1/products?select=id&category=eq.{requests.utils.quote(category_name, safe='')}",
-            headers=Config.SUPABASE_HEADERS,
-            timeout=10
-        )
-        if response.status_code != 200:
-            return jsonify({'success': False, 'message': 'Could not verify category usage'}), 500
-        if response.json():
-            return jsonify({
-                'success': False,
-                'message': 'Cannot delete a category assigned to products'
-            }), 409
-
-        local_data = load_json_data() or {}
-        stored_categories = local_data.get('categories', []) or []
-        if isinstance(stored_categories, dict):
-            stored_categories = list(stored_categories.keys())
-        if category_name in stored_categories:
-            local_data['categories'] = [
-                str(category).strip()
-                for category in stored_categories
-                if str(category).strip() != category_name
-            ]
-            save_json_data(local_data)
-
-        return jsonify({'success': True, 'message': f'Category "{category_name}" deleted'})
-    except Exception as e:
-        print(f"❌ Error deleting category: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
 # ============================================================
 # [NEW] ANALYTICS API - WITH CREDIT DATA MERGED
 # ============================================================
@@ -2396,7 +2392,7 @@ def admin_api_analytics():
             continue
         pm = (order.get('payment_method') or 'cash').lower()
         payment_counts[pm] = payment_counts.get(pm, 0) + 1
-        payment_revenue[pm] = payment_revenue.get(pm, 0) + float(order.get('total', 0) or 0)
+        payment_revenue[pm] = payment_revenue.get(pm, 0) + order_revenue(order)
 
     analytics['payment_methods'] = payment_counts
     analytics['payment_methods_revenue'] = payment_revenue
@@ -2442,13 +2438,7 @@ def admin_api_revenue():
         last_month_revenue = 0
 
         for order in orders:
-            total = order.get('total', 0)
-            if isinstance(total, str):
-                try:
-                    total = float(total.replace(',', ''))
-                except:
-                    total = 0
-            total = float(total or 0)
+            total = order_revenue(order)
 
             if order.get('status') == 'cancelled':
                 continue
@@ -2501,7 +2491,7 @@ def admin_api_revenue():
         else:
             month_growth = 100.0 if month_revenue > 0 else 0
 
-        total_revenue = sum(order_revenue_value(order) for order in orders if order.get('status') != 'cancelled')
+        total_revenue = sum(order_revenue(order) for order in orders if order.get('status') != 'cancelled')
 
         return jsonify({
             "total_revenue": total_revenue,
@@ -2857,7 +2847,7 @@ def api_customers():
                     'total_spent': 0
                 }
             customer_dict[name]['orders'] += 1
-            customer_dict[name]['total_spent'] += order.get('total', 0)
+            customer_dict[name]['total_spent'] += order_revenue(order)
 
         return jsonify(list(customer_dict.values()))
 
@@ -2925,7 +2915,7 @@ def api_sales_stats():
 
                 if order_date == today:
                     status = order.get('status', '')
-                    total = float(order.get('total', 0))
+                    total = order_revenue(order)
                     order_source = order.get('source', '')
                     is_credit_order = order.get('is_credit') is True or order_source == 'credit'
 
@@ -3537,7 +3527,7 @@ def api_customers_paginated():
                     'total_spent': 0
                 }
             customer_dict[name]['orders'] += 1
-            customer_dict[name]['total_spent'] += order.get('total', 0)
+            customer_dict[name]['total_spent'] += order_revenue(order)
         
         customers = list(customer_dict.values())
         customers.sort(key=lambda x: x['orders'], reverse=True)
@@ -3718,6 +3708,29 @@ def admin_pos_place_order():
 
         order_id = data.get('order_id', f'POS-{uuid.uuid4().hex[:8].upper()}')
         items = data.get('items', [])
+
+        existing_response = requests.get(
+            f"{Config.SUPABASE_URL}/rest/v1/orders",
+            headers=Config.SUPABASE_HEADERS,
+            params={
+                'order_id': f'eq.{order_id}',
+                'select': 'order_id,total,status,source,payment_method',
+                'limit': 1,
+            },
+            timeout=10,
+        )
+        if existing_response.status_code == 200:
+            existing_orders = existing_response.json() or []
+            if existing_orders:
+                existing_order = existing_orders[0]
+                return jsonify({
+                    'success': True,
+                    'duplicate': True,
+                    'order_id': existing_order.get('order_id', order_id),
+                    'total': existing_order.get('total', data.get('total', 0)),
+                    'synced': True,
+                    'message': 'Order already saved; no duplicate created.',
+                })
         
         print(f"📦 Received order: {order_id}")
         print(f"📦 Items: {len(items)}")
@@ -3825,6 +3838,8 @@ def admin_pos_place_order():
             'total': total,
             'status': 'confirmed',
             'source': 'pos',
+            'payment_method': data.get('payment_method', 'cash'),
+            'notes': data.get('notes', ''),
             'created_at': datetime.utcnow().isoformat(),
             'customer_name': customer_name,
             'customer_email': customer_email,
@@ -3836,10 +3851,6 @@ def admin_pos_place_order():
                 'phone': customer_phone,
                 'address': customer_address,
             },
-            'user_id': str(user_id),
-            'user_name': user_name,
-            'user_role': user_role,
-            'staff_name': user_name
         }
 
         print(f"💰 Total: KSh {total}")
@@ -4164,8 +4175,6 @@ def api_analytics_filtered():
 
         # ---- 3. Normalize both into a common shape ----
         def normalize(o, is_credit=False):
-            total = float(o.get('total') or o.get('amount') or 0)
-
             if is_credit:
                 source = 'credit'
                 payment_method = 'credit'
@@ -4184,9 +4193,29 @@ def api_analytics_filtered():
             if not isinstance(items, list):
                 items = []
 
+            item_total = 0.0
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                quantity = float(item.get('quantity') or 1)
+                price = float(item.get('price') or 0)
+                item_total += float(item.get('total') or (price * quantity))
+
+            if item_total > 0:
+                sales_total = item_total
+            else:
+                subtotal = float(o.get('subtotal') or 0)
+                discount = float(o.get('discount') or 0)
+                if subtotal or discount:
+                    sales_total = max(0, subtotal - discount)
+                else:
+                    charged_total = float(o.get('total') or o.get('amount') or 0)
+                    shipping = float(o.get('shipping') or 0)
+                    sales_total = max(0, charged_total - shipping)
+
             return {
                 'order_id': order_id,
-                'total': total,
+                'total': sales_total,
                 'source': source,
                 'payment_method': payment_method,
                 'status': (o.get('status') or 'confirmed').lower(),
