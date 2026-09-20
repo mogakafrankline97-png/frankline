@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>{% block title %}THEPENTAGON · Admin{% endblock %}</title>
+    <title>{% block title %}PENTAGON · Admin{% endblock %}</title>
 
     <!-- ===== CSS ===== -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
@@ -16,7 +16,7 @@
 
     <style>
         /* ============================================================
-           THEPENTAGON — MASTER STYLESHEET
+           MASTER STYLESHEET
            ============================================================ */
         .sidebar-toggle {
             display: none;
@@ -51,7 +51,7 @@
                 box-shadow: 4px 0 30px rgba(0, 0, 0, 0.25) !important;
                 border-radius: 0 !important;
                 overflow-y: auto !important;
-                background: #1e1b4b !important;
+                background: #0f172a !important;
             }
             .sidebar.open { transform: translateX(0) !important; }
             .sidebar-backdrop {
@@ -105,7 +105,7 @@
         }
 
         /* ============================================================
-           LEGACY TOAST
+           LEGACY TOAST (JS creates its own)
            ============================================================ */
         .toast {
             position: fixed;
@@ -195,8 +195,8 @@
             background: white;
         }
         .form-input:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
         .form-input:disabled { background: #f1f5f9; cursor: not-allowed; }
         select.form-input {
@@ -223,11 +223,11 @@
             border: none;
             cursor: pointer;
             transition: all 0.2s;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
             color: white;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
         }
-        .btn-gradient:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35); }
+        .btn-gradient:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35); }
         .btn-gradient:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .btn-gradient.green { background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25); }
         .btn-gradient.green:hover { box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35); }
@@ -267,17 +267,17 @@
         .btn-danger:hover { background: #fecaca; }
 
         /* ============================================================
-           SIDEBAR — INDIGO THEME
+           SIDEBAR
            ============================================================ */
         .sidebar {
             width: 260px;
-            background: #1e1b4b;
+            background: #0f172a;
             min-height: 100vh;
             padding: 20px 16px;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            border-right: 1px solid #312e81;
+            border-right: 1px solid #1e293b;
             overflow-y: auto;
         }
         .sidebar .brand {
@@ -285,14 +285,14 @@
             align-items: center;
             gap: 12px;
             padding-bottom: 20px;
-            border-bottom: 1px solid #312e81;
+            border-bottom: 1px solid #1e293b;
             margin-bottom: 16px;
         }
         .sidebar .brand-icon {
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #10b981, #7c3aed);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -300,14 +300,14 @@
             font-size: 1.2rem;
             flex-shrink: 0;
         }
-        .sidebar .brand-text { font-size: 1.1rem; font-weight: 800; color: white; letter-spacing: -0.5px; }
-        .sidebar .brand-text span { color: #fbbf24; }
-        .sidebar .brand-sub { font-size: 0.65rem; color: #a5b4fc; letter-spacing: 0.5px; text-transform: uppercase; }
+        .sidebar .brand-text { font-size: 1.2rem; font-weight: 800; color: white; letter-spacing: -0.5px; }
+        .sidebar .brand-text span { color: #60a5fa; }
+        .sidebar .brand-sub { font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; }
         .sidebar .nav-label {
             font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            color: #6366f1;
+            color: #475569;
             padding: 12px 12px 6px;
             font-weight: 700;
         }
@@ -317,7 +317,7 @@
             gap: 12px;
             padding: 10px 12px;
             border-radius: 8px;
-            color: #c7d2fe;
+            color: #94a3b8;
             text-decoration: none;
             transition: all 0.15s;
             cursor: pointer;
@@ -325,27 +325,27 @@
             font-weight: 500;
             position: relative;
         }
-        .sidebar .nav-item:hover { background: #312e81; color: #ffffff; }
-        .sidebar .nav-item.active { background: #312e81; color: white; }
+        .sidebar .nav-item:hover { background: #1e293b; color: #e2e8f0; }
+        .sidebar .nav-item.active { background: #1e293b; color: white; }
         .sidebar .nav-item.active::before {
             content: '';
             position: absolute;
             left: 0; top: 8px; bottom: 8px;
             width: 3px;
             border-radius: 0 4px 4px 0;
-            background: linear-gradient(180deg, #fbbf24, #10b981);
+            background: linear-gradient(180deg, #3b82f6, #8b5cf6);
         }
         .sidebar .nav-item i { width: 20px; text-align: center; font-size: 0.95rem; flex-shrink: 0; }
         .sidebar .nav-item .badge {
             margin-left: auto;
-            background: #312e81;
-            color: #c7d2fe;
+            background: #1e293b;
+            color: #94a3b8;
             padding: 1px 8px;
             border-radius: 12px;
             font-size: 0.6rem;
             font-weight: 700;
         }
-        .sidebar .nav-item.active .badge { background: #4f46e5; color: white; }
+        .sidebar .nav-item.active .badge { background: #2563eb; color: white; }
         .sidebar .nav-item.pos-link .pos-badge {
             margin-left: auto;
             background: linear-gradient(135deg, #059669, #10b981);
@@ -358,18 +358,22 @@
         }
         .sidebar .nav-item.pos-link:hover .pos-badge { background: linear-gradient(135deg, #047857, #059669); }
         .sidebar .spacer { flex: 1; }
-        .sidebar .footer { padding-top: 16px; border-top: 1px solid #312e81; margin-top: 8px; }
-        .sidebar .footer .nav-item { color: #6366f1; }
-        .sidebar .footer .nav-item:hover { color: #a5b4fc; }
+        .sidebar .footer { padding-top: 16px; border-top: 1px solid #1e293b; margin-top: 8px; }
+        .sidebar .footer .nav-item { color: #475569; }
+        .sidebar .footer .nav-item:hover { color: #94a3b8; }
 
         /* ============================================================
            MAIN CONTENT
            ============================================================ */
-        .app { display: flex; min-height: 100vh; }
+        html, body { max-width: 100%; overflow-x: hidden; }
+        .app { display: flex; min-height: 100vh; max-width: 100%; }
         .main-content {
             flex: 1;
             background: #f8fafc;
             min-height: 100vh;
+            min-width: 0;
+            max-width: 100vw;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
         }
@@ -381,6 +385,7 @@
             background: white;
             border-bottom: 1px solid #e2e8f0;
             flex-shrink: 0;
+            min-width: 0;
             min-height: 70px;
         }
         .header .page-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; }
@@ -417,7 +422,7 @@
             transition: all 0.2s;
         }
         .header .logout-btn:hover { background: #fee2e2; color: #dc2626; }
-        .content-area { padding: 20px 24px 40px; flex: 1; }
+        .content-area { padding: 20px 24px 40px; flex: 1; min-width: 0; max-width: 100%; }
 
         /* ============================================================
            QUICK ACTION / STAT / GLASS CARDS
@@ -437,8 +442,8 @@
             min-height: 70px;
         }
         .quick-action:hover {
-            border-color: #4f46e5;
-            box-shadow: 0 2px 12px rgba(79, 70, 229, 0.08);
+            border-color: #3b82f6;
+            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
             transform: translateY(-2px);
         }
         .quick-action i { font-size: 1.4rem; margin-bottom: 2px; }
@@ -545,7 +550,7 @@
             cursor: pointer;
         }
         .pagination .page-link:hover { background: #f1f5f9; border-color: #94a3b8; }
-        .pagination .page-link.active { background: #4f46e5; border-color: #4f46e5; color: white; }
+        .pagination .page-link.active { background: #2563eb; border-color: #2563eb; color: white; }
         .pagination .page-link:disabled { opacity: 0.4; cursor: not-allowed; }
 
         /* ============================================================
@@ -606,8 +611,8 @@
         .text-gray-600 { color: #475569; }
         .text-green-600 { color: #16a34a; }
         .text-red-600 { color: #dc2626; }
-        .text-blue-500 { color: #6366f1; }
-        .text-blue-600 { color: #4f46e5; }
+        .text-blue-500 { color: #3b82f6; }
+        .text-blue-600 { color: #2563eb; }
         .text-purple-600 { color: #7c3aed; }
         .text-amber-600 { color: #d97706; }
         .bg-white { background: white; }
@@ -645,9 +650,9 @@
         <!-- ===== SIDEBAR ===== -->
         <aside class="sidebar" id="sidebar">
             <div class="brand">
-                <div class="brand-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="brand-icon"><i class="fas fa-bolt"></i></div>
                 <div>
-                    <div class="brand-text">THE<span>PENTAGON</span></div>
+                    <div class="brand-text">ACACIA<span>MART</span></div>
                     <div class="brand-sub">Administration</div>
                 </div>
             </div>
@@ -678,13 +683,13 @@
             </a>
 
             <a href="#credit" class="nav-item" onclick="showSection('credit'); return false;">
-                <i class="fas fa-hand-holding-usd" style="color: #fbbf24;"></i><span>Credit Management</span>
-                <span class="badge" id="creditCount" style="background: #fbbf24; color: #1e1b4b;">0</span>
+                <i class="fas fa-hand-holding-usd" style="color: #f59e0b;"></i><span>Credit Management</span>
+                <span class="badge" id="creditCount" style="background: #f59e0b; color: white;">0</span>
             </a>
 
             <a href="#suppliers" class="nav-item" onclick="showSection('suppliers'); return false;">
-                <i class="fas fa-truck" style="color: #a5b4fc;"></i><span>Suppliers</span>
-                <span class="badge" id="supplierCount" style="background: #a5b4fc; color: #1e1b4b;">0</span>
+                <i class="fas fa-truck" style="color: #8b5cf6;"></i><span>Suppliers</span>
+                <span class="badge" id="supplierCount" style="background: #8b5cf6; color: white;">0</span>
             </a>
 
             <div class="nav-label">Sales</div>
@@ -842,12 +847,15 @@
     </div>
 
     <!-- ============================================================
-         CORE SCRIPT — UNCHANGED FROM BEFORE
+         CORE SCRIPT
          ============================================================ -->
     <script>
     (function() {
         'use strict';
 
+        // ============================================================
+        // PAGE-ALIVE GUARD
+        // ============================================================
         window.__pageAlive = true;
         window.addEventListener('beforeunload', function() {
             window.__pageAlive = false;
@@ -855,6 +863,9 @@
 
         window.__layoutInitialized = false;
 
+        // ============================================================
+        // BULLETPROOF TOAST
+        // ============================================================
         window.showToast = function(message, type) {
             type = type || 'success';
             try {
@@ -895,10 +906,14 @@
 
         window.safeToast = window.showToast;
 
+        // ============================================================
+        // SIDEBAR TOGGLE
+        // ============================================================
         window.toggleSidebar = function() {
             var sidebar = document.getElementById('sidebar');
             var backdrop = document.getElementById('backdrop');
             if (!sidebar) return;
+
             var isOpen = sidebar.classList.contains('open');
             if (isOpen) {
                 sidebar.classList.remove('open');
@@ -916,11 +931,17 @@
             if (backdrop) backdrop.classList.remove('active');
         };
 
+        // ============================================================
+        // CLOSE MODAL
+        // ============================================================
         window.closeModal = function(id) {
             var modal = document.getElementById(id);
             if (modal) modal.classList.add('hidden');
         };
 
+        // ============================================================
+        // SECTION TOGGLE
+        // ============================================================
         window.showSection = function(sectionName) {
             var sections = document.querySelectorAll('.section');
             for (var i = 0; i < sections.length; i++) {
@@ -962,9 +983,13 @@
             }
         };
 
+        // ============================================================
+        // SIDEBAR COUNTS (throttled)
+        // ============================================================
         function fetchCount(url, elementId) {
             var el = document.getElementById(elementId);
             if (!el) return;
+
             fetch(url, { credentials: 'same-origin' })
                 .then(function(r) {
                     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -994,6 +1019,9 @@
             fetchCount('/admin/api/customers/count', 'customerCount');
         };
 
+        // ============================================================
+        // INDEXEDDB
+        // ============================================================
         var DB_NAME = 'PricePointDB';
         var DB_VERSION = 1;
         var STORE_NAME = 'orders';
@@ -1002,7 +1030,9 @@
         function openDB() {
             return new Promise(function(resolve, reject) {
                 if (db) { resolve(db); return; }
+
                 var request = indexedDB.open(DB_NAME, DB_VERSION);
+
                 request.onupgradeneeded = function(event) {
                     var database = event.target.result;
                     if (!database.objectStoreNames.contains(STORE_NAME)) {
@@ -1011,10 +1041,12 @@
                         store.createIndex('created_at', 'created_at', { unique: false });
                     }
                 };
+
                 request.onsuccess = function(event) {
                     db = event.target.result;
                     resolve(db);
                 };
+
                 request.onerror = function(event) {
                     reject(event.target.error);
                 };
@@ -1027,8 +1059,10 @@
                     try {
                         var tx = database.transaction(STORE_NAME, 'readwrite');
                         var store = tx.objectStore(STORE_NAME);
+
                         if (typeof order.synced === 'undefined') order.synced = false;
                         if (!order.synced_at) order.synced_at = null;
+
                         var req = store.put(order);
                         req.onsuccess = function() { resolve(order); };
                         req.onerror = function(e) { reject(e.target.error); };
@@ -1045,6 +1079,7 @@
                         var store = tx.objectStore(STORE_NAME);
                         var index = store.index('synced');
                         var req = index.getAll(false);
+
                         req.onsuccess = function() { resolve(req.result || []); };
                         req.onerror = function(e) { reject(e.target.error); };
                     } catch (err) { reject(err); }
@@ -1059,9 +1094,11 @@
                         var tx = database.transaction(STORE_NAME, 'readwrite');
                         var store = tx.objectStore(STORE_NAME);
                         var getReq = store.get(orderId);
+
                         getReq.onsuccess = function() {
                             var order = getReq.result;
                             if (!order) { resolve(null); return; }
+
                             order.synced = true;
                             order.synced_at = new Date().toISOString();
                             if (extra) {
@@ -1071,16 +1108,21 @@
                                     }
                                 }
                             }
+
                             var putReq = store.put(order);
                             putReq.onsuccess = function() { resolve(order); };
                             putReq.onerror = function(e) { reject(e.target.error); };
                         };
+
                         getReq.onerror = function(e) { reject(e.target.error); };
                     } catch (err) { reject(err); }
                 });
             });
         };
 
+        // ============================================================
+        // SYNC OFFLINE ORDERS
+        // ============================================================
         var __syncing = false;
 
         window.syncOfflineOrders = function() {
@@ -1178,6 +1220,9 @@
             });
         };
 
+        // ============================================================
+        // VIEW ORDER
+        // ============================================================
         window.viewOrder = function(orderId) {
             var modal = document.getElementById('orderModal');
             var details = document.getElementById('orderDetails');
@@ -1277,6 +1322,9 @@
                 '</div>';
         };
 
+        // ============================================================
+        // EDIT PRODUCT
+        // ============================================================
         window.editProduct = function(productId) {
             var modal = document.getElementById('editProductModal');
             if (!modal) { window.showToast('❌ Edit modal not found', 'error'); return; }
@@ -1364,6 +1412,9 @@
                 });
         };
 
+        // ============================================================
+        // DELETE PRODUCT
+        // ============================================================
         window.deleteProduct = function(productId) {
             if (!productId) { window.showToast('❌ No product ID', 'error'); return; }
             if (!confirm('⚠️ Delete product "' + productId + '"?\n\nThis cannot be undone.')) return;
@@ -1391,6 +1442,9 @@
                 });
         };
 
+        // ============================================================
+        // DELETE SUPPLIER
+        // ============================================================
         window.deleteSupplier = function(supplierId, supplierName) {
             if (!supplierId) { window.showToast('❌ No supplier ID', 'error'); return; }
 
@@ -1422,6 +1476,9 @@
                 });
         };
 
+        // ============================================================
+        // ADD CUSTOMER (stub)
+        // ============================================================
         window.addCustomer = function(event) {
             event.preventDefault();
             var name = document.getElementById('custName').value.trim();
@@ -1431,6 +1488,9 @@
             document.getElementById('customerForm').reset();
         };
 
+        // ============================================================
+        // PLACE ORDER (used by POS)
+        // ============================================================
         window.placeOrder = function(orderData) {
             fetch('/admin/pos/place-order', {
                 method: 'POST',
@@ -1460,6 +1520,9 @@
                 });
         };
 
+        // ============================================================
+        // INIT — runs exactly once
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             if (window.__layoutInitialized) {
                 console.log('⏭️ Layout init skipped (already initialized)');
@@ -1467,15 +1530,18 @@
             }
             window.__layoutInitialized = true;
 
-            console.log('✅ THEPENTAGON Layout initialized');
+            console.log('✅ Layout initialized');
 
+            // Sidebar counts
             window.loadAllSidebarCounts();
 
+            // Backdrop close
             var backdrop = document.getElementById('backdrop');
             if (backdrop) {
                 backdrop.addEventListener('click', window.closeSidebar);
             }
 
+            // Check for unsynced orders
             window.getUnsyncedOrdersFromIndexedDB().then(function(orders) {
                 if (!window.__pageAlive) return;
 
@@ -1504,6 +1570,7 @@
             });
         });
 
+        // Online event
         window.addEventListener('online', function() {
             if (!window.__pageAlive) return;
 
@@ -1526,6 +1593,7 @@
             }, 1000);
         });
 
+        // Escape key closes modals
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 window.closeSidebar();
@@ -1535,13 +1603,14 @@
             }
         });
 
+        // Resize closes sidebar on desktop
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
                 window.closeSidebar();
             }
         });
 
-        console.log('✅ THEPENTAGON Admin layout ready');
+        console.log('✅ ACACIAMART Admin layout ready');
     })();
     </script>
 
