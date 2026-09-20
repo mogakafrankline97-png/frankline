@@ -561,6 +561,10 @@
         .table-wrap table thead th { font-size: 0.5rem; padding: 6px 8px; }
         .table-wrap table tbody td { padding: 6px 8px; font-size: 0.7rem; }
         .sm-table-cell { display: none !important; }
+            .analytics-grid,
+            .dashboard-cards-grid { grid-template-columns: 1fr !important; }
+            .glass-card,
+            .card-header { min-width: 0; }
     }
     
     @media (max-width: 480px) {
@@ -942,7 +946,7 @@
     </div>
 
     <!-- CHARTS ROW -->
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
+    <div class="analytics-grid" style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="glass-card">
             <div class="card-header">
                 <div class="title"><span class="icon">📈</span> Sales & Profit Trend</div>
@@ -969,7 +973,7 @@
     </div>
 
     <!-- BOTTOM ROW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+    <div class="dashboard-cards-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="glass-card">
             <div class="card-header">
                 <div class="title"><span class="icon">🏆</span> Top Products</div>
@@ -1482,6 +1486,10 @@
                 <button type="submit" class="btn-gradient">💾 Save Category</button>
             </div>
         </form>
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-color);">
+            <div class="form-label" style="margin-bottom:8px;">Saved Categories</div>
+            <div id="categoryManagementList" style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;"></div>
+        </div>
     </div>
 </div>
 
@@ -2215,7 +2223,7 @@ function closeModal(event, modalId) {
 function loadCategories() {
     console.log('🔄 Loading categories dynamically...');
 
-    fetch('/api/categories?t=' + Date.now())
+    fetch('/admin/api/categories?t=' + Date.now())
         .then(function(r) {
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.json();
@@ -2255,6 +2263,7 @@ function loadCategories() {
             allCategories = categories;
             window.allCategories = categories;
             populateCategorySelects(categories);
+            populateCategoryManagementList(categories);
             console.log('✅ Categories loaded:', categories.length, 'categories');
         })
         .catch(function(err) {
@@ -2263,6 +2272,7 @@ function loadCategories() {
             allCategories = fallback;
             window.allCategories = fallback;
             populateCategorySelects(fallback);
+            populateCategoryManagementList(fallback);
             showToast('Using default category', 'warning');
         });
 }
@@ -2290,7 +2300,7 @@ function saveCategory(event) {
         return;
     }
 
-    fetch('/api/categories', {
+    fetch('/admin/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: categoryName })
@@ -2310,6 +2320,53 @@ function saveCategory(event) {
         console.error('❌ Error saving category:', err);
         showToast('❌ Error saving category', 'error');
     });
+}
+
+function populateCategoryManagementList(categories) {
+    var container = document.getElementById('categoryManagementList');
+    if (!container) return;
+
+    container.innerHTML = '';
+    for (var i = 0; i < categories.length; i++) {
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;background:var(--bg-input);border-radius:6px;font-size:0.7rem;';
+
+        var name = document.createElement('span');
+        name.textContent = categories[i];
+        row.appendChild(name);
+
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn-outline';
+        button.style.cssText = 'padding:3px 7px;font-size:0.65rem;color:var(--danger);';
+        button.textContent = '🗑️ Delete';
+        button.onclick = (function(categoryName) {
+            return function() { deleteCategory(categoryName); };
+        })(categories[i]);
+        row.appendChild(button);
+        container.appendChild(row);
+    }
+}
+
+function deleteCategory(categoryName) {
+    if (!confirm('Delete category "' + categoryName + '"?')) return;
+
+    fetch('/admin/api/categories/' + encodeURIComponent(categoryName), { method: 'DELETE' })
+        .then(function(response) {
+            return response.json().then(function(data) {
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Could not delete category');
+                }
+                return data;
+            });
+        })
+        .then(function(data) {
+            showToast('✅ ' + data.message, 'success');
+            loadCategories();
+        })
+        .catch(function(error) {
+            showToast('❌ ' + error.message, 'error');
+        });
 }
 
 function showAddUserModal() {
@@ -2398,7 +2455,7 @@ function addNewCategoryIfNeeded(categoryName) {
     window.allCategories = allCategories;
     populateCategorySelects(allCategories);
 
-    fetch('/api/categories', {
+    fetch('/admin/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: categoryName })
@@ -2467,7 +2524,7 @@ function loadSupplierCategories() {
     var categories = window.allCategories || [];
 
     if (categories.length === 0) {
-        fetch('/api/categories?t=' + Date.now())
+        fetch('/admin/api/categories?t=' + Date.now())
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var catNames = [];
